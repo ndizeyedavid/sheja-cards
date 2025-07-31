@@ -104,7 +104,7 @@ Sheja is a modern multi-tenant platform designed to help schools manage student 
 - `Lucide Icons` for UI
 - `@react-pdf/renderer` (coming soon)
 
-## 🚧 In Progress
+## In Progress
 
 - PDF Export for ID cards
 - Staff audit logs
