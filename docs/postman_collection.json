@@ -1,0 +1,305 @@
+{
+    "info": {
+        "name": "SHEJA Backend",
+        "description": "API collection for SHEJA School Management System",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Super Admin Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "email": "john@example.com",
+                                "password": "Password123"
+                            }
+                        },
+                        "url": "{{baseUrl}}/api/v1/staff/super/login"
+                    }
+                },
+                {
+                    "name": "Register Staff",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "name": "John Doe",
+                                "email": "john@example.com",
+                                "password": "Password123",
+                                "role": "TEACHER",
+                                "schoolId": "{{schoolId}}",
+                                "phone": "1234567890",
+                                "idNumber": "ID123456"
+                            }
+                        },
+                        "url": "{{baseUrl}}/api/v1/staff/register"
+                    }
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "email": "john@example.com",
+                                "password": "Password123"
+                            }
+                        },
+                        "url": "{{baseUrl}}/api/v1/staff/login"
+                    }
+                },
+                {
+                    "name": "Verify OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "email": "john@example.com",
+                                "otp": "123456"
+                            }
+                        },
+                        "url": "{{baseUrl}}/api/v1/staff/verify-otp"
+                    }
+                },
+                {
+                    "name": "Setup Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "email": "john@example.com",
+                                "currentPassword": "OldPass123",
+                                "newPassword": "NewPass123",
+                                "confirmPassword": "NewPass123"
+                            }
+                        },
+                        "url": "{{baseUrl}}/api/v1/staff/setup-password"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "School",
+            "item": [
+                {
+                    "name": "Create School",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "name": "Example School",
+                                "address": "123 School St",
+                                "phone": "1234567890",
+                                "email": "school@example.com"
+                            }
+                        },
+                        "url": "{{baseUrl}}/api/v1/schools"
+                    }
+                },
+                {
+                    "name": "Get Schools",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/v1/schools"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Staff",
+            "item": [
+                {
+                    "name": "Get Staff Members",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/v1/staff"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Class",
+            "item": [
+                {
+                    "name": "Create Class",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "name": "Class A",
+                                "combination": "Science",
+                                "academicYear": "2023-2024"
+                            }
+                        },
+                        "url": "{{baseUrl}}/api/v1/classes"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Student",
+            "item": [
+                {
+                    "name": "Create Student",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": {
+                                "firstName": "Jane",
+                                "lastName": "Doe",
+                                "dateOfBirth": "2005-01-01T00:00:00.000Z",
+                                "gender": "female",
+                                "class": "{{classId}}",
+                                "registrationNumber": "REG123",
+                                "academicYear": "2023-2024"
+                            }
+                        },
+                        "url": "{{baseUrl}}/api/v1/students"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "ID Card",
+            "item": [
+                {
+                    "name": "Generate Student ID Card",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/v1/idcards/student/{{studentId}}"
+                    }
+                },
+                {
+                    "name": "Generate Class ID Cards",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/v1/idcards/class/{{classId}}"
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "your_jwt_token_here",
+            "type": "string"
+        },
+        {
+            "key": "schoolId",
+            "value": "your_school_id_here",
+            "type": "string"
+        },
+        {
+            "key": "classId",
+            "value": "your_class_id_here",
+            "type": "string"
+        },
+        {
+            "key": "studentId",
+            "value": "your_student_id_here",
+            "type": "string"
+        }
+    ]
+}

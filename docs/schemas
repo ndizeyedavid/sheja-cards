@@ -1,0 +1,53 @@
+Shoool
+{
+  name: string,
+  logo: string, // image URL
+  colorPalette: { primary: string, secondary: string },
+  address: string,
+  contact: { phone: string, email: string },
+  year: number, // current academic year
+  templateId: ObjectId, // reference to Template
+  headmaster: ObjectId // linked to AdminUser
+}
+
+StaffUser
+{
+  schoolId: ObjectId,
+  name: string,
+  email: string,
+  phone: string,
+  idNumber: string,
+  role: "HEADMASTER" | "BURSAR" | "PATRON" | "DISCIPLINE_MASTER" | "DOS",
+  password: string, // hashed
+  passwordResetRequired: boolean,
+  emailVerified: boolean,
+  otpCode: string | null,
+  otpExpiry: Date | null
+}
+
+Class
+{
+  schoolId: ObjectId,
+  name: string,
+  combination: string, // optional
+  year: number
+}
+
+Student
+{
+  schoolId: ObjectId,
+  classId: ObjectId,
+  name: string,
+  gender: "Male" | "Female" | "Other",
+  profileImage: string,
+  additionalFields: object, // custom fields
+  year: number
+}
+
+Template
+{
+  name: string,
+  previewImage: string,
+  htmlFilePath: string,
+  createdBy: "SYSTEM" | ObjectId
+}
