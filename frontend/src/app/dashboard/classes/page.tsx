@@ -26,22 +26,11 @@ const students = [
   // Add more students...
 ];
 
-export default function StudentsPage() {
-  const [selectedYear, setSelectedYear] = useState<string>("2024");
-  const [selectedClass, setSelectedClass] = useState<string>("Form 1");
-  const [isFiltered, setIsFiltered] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
+export default function page() {
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
       <div className="grid gap-4 px-4 lg:px-6">
-        <ClassesTable
-          classes={classes}
-          isFiltered={isFiltered}
-          selectedYear={selectedYear}
-          selectedClass={selectedClass}
-          isLoading={isLoading}
-        />
+        <ClassesTable classes={classes} />
       </div>
     </div>
   );

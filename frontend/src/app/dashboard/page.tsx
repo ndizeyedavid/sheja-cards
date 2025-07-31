@@ -4,7 +4,7 @@ import SearchStudent from "@/components/search-bar/SearchStudent";
 import { RecentStudents } from "@/components/tables/RecentStudents";
 import { StudentDistribution } from "@/components/graphs/StudentDistribution";
 
-export default function DashboardPage() {
+export default function page() {
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
       <SectionCards />
