@@ -21,7 +21,7 @@ const students = [
   // Add more students...
 ];
 
-export default function StudentsPage() {
+export default function page() {
   const [selectedYear, setSelectedYear] = useState<string>("2024");
   const [selectedClass, setSelectedClass] = useState<string>("Form 1");
   const [isFiltered, setIsFiltered] = useState(false);

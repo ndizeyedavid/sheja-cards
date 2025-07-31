@@ -19,6 +19,7 @@ import {
   IconEye,
   IconTrash,
   IconSearch,
+  IconPrinter,
 } from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -35,10 +36,6 @@ import Loading from "./Loading";
 
 interface classesTableProps {
   classes: Classes[];
-  isFiltered: boolean;
-  selectedYear: string;
-  selectedClass: string;
-  isLoading: boolean;
 }
 
 export default function ClassesTable({ classes }: classesTableProps) {
@@ -63,7 +60,7 @@ export default function ClassesTable({ classes }: classesTableProps) {
           </Badge>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 w-full">
+          <div className="mb-4 flex items-center justify-between">
             <div className="relative flex-1 w-full max-w-sm">
               <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -72,6 +69,16 @@ export default function ClassesTable({ classes }: classesTableProps) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8 w-full"
               />
+            </div>
+
+            <div className="flex items-center">
+              <Button className="ml-4">
+                <IconBooks className="mr-2 h-4 w-4" />
+                New Class
+              </Button>
+              <Button className="ml-4">
+                <IconPrinter className="size-4" />
+              </Button>
             </div>
           </div>
           <div className="rounded-lg border">

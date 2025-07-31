@@ -19,6 +19,9 @@ import {
   IconEye,
   IconTrash,
   IconSearch,
+  IconUserPlus,
+  IconUpload,
+  IconPrinter,
 } from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -95,7 +98,7 @@ export default function StudentsTable({
             </Badge>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 w-full">
+            <div className="mb-4 flex items-center justify-between">
               <div className="relative flex-1 w-full max-w-sm">
                 <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -105,7 +108,22 @@ export default function StudentsTable({
                   className="pl-8 w-full"
                 />
               </div>
+
+              <div className="flex items-center">
+                <Button variant="outline" className="ml-4">
+                  <IconUpload className="mr-2 h-4 w-4" />
+                  Bulk add
+                </Button>
+                <Button className="ml-4">
+                  <IconUserPlus className="mr-2 h-4 w-4" />
+                  New Student
+                </Button>
+                <Button className="ml-4">
+                  <IconPrinter className="size-4" />
+                </Button>
+              </div>
             </div>
+
             <div className="rounded-lg border">
               <Table>
                 <TableHeader>
