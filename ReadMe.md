@@ -1,4 +1,4 @@
-# 🎓 Sheja - Multi-Tenant Student Card Platform
+# Sheja - Multi-Tenant Student Card Platform
 
 Sheja is a modern multi-tenant platform designed to help schools manage student records and generate custom student ID cards. It includes full authentication, role-based access, class and student management, and PDF export features, all backed by a robust Express API and a beautiful Next.js dashboard.
 
