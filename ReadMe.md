@@ -49,7 +49,7 @@ Sheja is a modern multi-tenant platform designed to help schools manage student 
 ## Project Structure
 
 ### Backend (`/server`)
-
+```structure
 /server
 ├── src
 │ ├── app.ts
@@ -61,9 +61,10 @@ Sheja is a modern multi-tenant platform designed to help schools manage student 
 │ ├── models/
 │ ├── config/
 │ └── types/
-
+```
 ### Frontend
 
+```structure
 /app
 ├── app/
 │ ├── (landing pages)
@@ -80,7 +81,7 @@ Sheja is a modern multi-tenant platform designed to help schools manage student 
 ├── hooks/
 ├── utils/
 └── styles/
-
+```
 ---
 
 ## 🧪 Tech Stack
