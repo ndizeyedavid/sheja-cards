@@ -1,12 +1,12 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { comparePassword } from '../helpers/bcrypt.helper';
+import mongoose, { Schema, Document } from "mongoose";
+import { comparePassword } from "../helpers/bcrypt.helper";
 
 export enum StaffRole {
-  HEADMASTER = 'HEADMASTER',
-  DOS = 'DOS',
-  BURSAR = 'BURSAR',
-  PATRON = 'PATRON',
-  TEACHER = 'TEACHER'
+  HEADMASTER = "HEADMASTER",
+  DOS = "DOS",
+  BURSAR = "BURSAR",
+  PATRON = "PATRON",
+  TEACHER = "TEACHER",
 }
 
 export interface IStaff extends Document {
@@ -32,42 +32,42 @@ const staffSchema = new Schema<IStaff>(
   {
     name: {
       type: String,
-      required: [true, 'Staff name is required'],
+      required: [true, "Staff name is required"],
       trim: true,
     },
     email: {
       type: String,
-      required: [true, 'Email address is required'],
+      required: [true, "Email address is required"],
       unique: true,
       trim: true,
       lowercase: true,
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
-      minlength: [8, 'Password must be at least 8 characters long'],
-      select: false,
+      required: [true, "Password is required"],
+      minlength: [8, "Password must be at least 8 characters long"],
+      select: true,
     },
     phone: {
       type: String,
-      required: [true, 'Phone number is required'],
+      required: [true, "Phone number is required"],
       trim: true,
     },
     idNumber: {
       type: String,
-      required: [true, 'ID number is required'],
+      required: [true, "ID number is required"],
       unique: true,
       trim: true,
     },
     role: {
       type: String,
       enum: Object.values(StaffRole),
-      required: [true, 'Staff role is required'],
+      required: [true, "Staff role is required"],
     },
     school: {
       type: Schema.Types.ObjectId,
-      ref: 'School',
-      required: [true, 'School reference is required'],
+      ref: "School",
+      required: [true, "School reference is required"],
     },
     isActive: {
       type: Boolean,
@@ -86,15 +86,6 @@ const staffSchema = new Schema<IStaff>(
   }
 );
 
-// Compare password method
-staffSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-  try {
-    return await comparePassword(candidatePassword, this.password);
-  } catch (error) {
-    throw new Error('Password comparison failed');
-  }
-};
-
-const Staff = mongoose.model<IStaff>('Staff', staffSchema);
+const Staff = mongoose.model<IStaff>("Staff", staffSchema);
 
 export default Staff;
