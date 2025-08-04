@@ -1,219 +1,784 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-    Eye,
-    EyeOff,
-    Mail,
-    Lock,
-    User,
-    Phone,
-    ArrowRight,
-    Github,
-    Chrome,
-} from "lucide-react";
 import { useState } from "react";
-import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+// @ts-ignore
+import { PasswordInput } from "@/components/ui/password-input";
+// @ts-ignore
+import {
+  FileUpload,
+  FileUploadDropzone,
+  FileUploadItem,
+  FileUploadItemDelete,
+  FileUploadItemMetadata,
+  FileUploadItemPreview,
+  FileUploadTrigger,
+} from "@/components/ui/file-upload";
+import { Switch } from "@/components/ui/switch";
+import RenderText from "./RenderText";
+import { Phone, UploadIcon, XIcon } from "lucide-react";
+import { PhoneInput } from "@/components/form-input/PhoneInput";
+import { ColorPicker } from "@/components/form-input/ColorPicker";
+import { AnimatePresence } from "framer-motion";
+import { MotionSlide } from "@/components/motion/MotionSlide";
 
 export default function page() {
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [acceptTerms, setAcceptTerms] = useState(false);
+  const [step, setStep] = useState<number>(0);
+  const totalSteps = 7; // Updated from 6 to 7
 
-    return (
-        <section className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 dark:from-background dark:to-muted/20 p-4">
-            <Card className="w-full max-w-lg border-2 shadow-2xl">
-                <CardHeader className="space-y-4 text-center">
-                    <div className="mx-auto w-16 h-16 bg-black/80 rounded-full flex items-center justify-center">
-                        <User className="h-8 w-8 text-white" />
-                    </div>
-                    <div className="space-y-2">
-                        <CardTitle className="text-2xl font-bold">
-                            Create Your Account
-                        </CardTitle>
-                        <CardDescription className="text-muted-foreground">
-                            Join us today and start your journey
-                        </CardDescription>
-                    </div>
-                </CardHeader>
+  const form = useForm();
 
-                <CardContent className="space-y-6">
-                    {/* Registration Form */}
-                    <form className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="firstName">First Name</Label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        id="firstName"
-                                        placeholder="John"
-                                        className="pl-10"
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="lastName">Last Name</Label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        id="lastName"
-                                        placeholder="Doe"
-                                        className="pl-10"
-                                    />
-                                </div>
-                            </div>
-                        </div>
+  const { handleSubmit, control, reset } = form;
 
+  const onSubmit = async (formData: unknown) => {
+    if (step < totalSteps - 1) {
+      setStep(step + 1);
+    } else {
+      console.log(formData);
+      setStep(0);
+      reset();
+
+      toast.success("Form successfully submitted");
+    }
+  };
+
+  const handleBack = () => {
+    if (step > 0) {
+      setStep(step - 1);
+    }
+  };
+
+  return (
+    <section className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 dark:from-background dark:to-muted/20 p-4">
+      <div className="space-y-4 w-full max-w-lg">
+        <div className="flex items-center justify-center">
+          {Array.from({ length: totalSteps }).map((_, index) => (
+            <div key={index} className="flex items-center">
+              <div
+                className={cn(
+                  "w-4 h-4 rounded-full transition-all duration-300 ease-in-out",
+                  index <= step ? "bg-primary" : "bg-primary/30",
+                  index < step && "bg-primary"
+                )}
+              />
+              {index < totalSteps - 1 && (
+                <div
+                  className={cn(
+                    "w-8 h-0.5",
+                    index < step ? "bg-primary" : "bg-primary/30"
+                  )}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg">Register a new account</CardTitle>
+            <CardDescription>{RenderText({ step })}</CardDescription>
+          </CardHeader>
+          <CardContent className="overflow-hidden">
+            <AnimatePresence mode="wait" initial={false}>
+              <MotionSlide key={step}>
+                {step === 0 && (
+                  <Form {...form}>
+                    <form
+                      onSubmit={handleSubmit(onSubmit)}
+                      className="space-y-6"
+                    >
+                      <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email Address</Label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="john@example.com"
-                                    className="pl-10"
-                                />
-                            </div>
+                          <h3 className="text-xl font-semibold text-primary">
+                            Welcome to SHEJA!
+                          </h3>
+                          <p className="text-muted-foreground">
+                            We&apos;re excited to help you set up your
+                            school&apos;s digital presence. This registration
+                            process consists of 6 simple steps:
+                          </p>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="phone">Phone Number (Optional)</Label>
-                            <div className="relative">
-                                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    id="phone"
-                                    type="tel"
-                                    placeholder="+1 (555) 000-0000"
-                                    className="pl-10"
-                                />
-                            </div>
+                        <div className="grid gap-4 pl-4">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary" />
+                            <p className="text-sm">Personal Information</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary" />
+                            <p className="text-sm">Account Security</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary" />
+                            <p className="text-sm">Identity Verification</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary" />
+                            <p className="text-sm">School Details</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary" />
+                            <p className="text-sm">School Branding</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary" />
+                            <p className="text-sm">Final Review</p>
+                          </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Create a strong password"
-                                    className="pl-10 pr-10"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                                    ) : (
-                                        <Eye className="h-4 w-4 text-muted-foreground" />
-                                    )}
-                                </Button>
-                            </div>
+                        <div className="rounded-lg border p-4 bg-muted/50">
+                          <p className="text-sm text-muted-foreground">
+                            Please ensure you have the following ready:
+                            <br />• Valid ID number
+                            <br />• School logo (if available)
+                            <br />• School contact information
+                          </p>
                         </div>
+                      </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="confirmPassword">Confirm Password</Label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    id="confirmPassword"
-                                    type={showConfirmPassword ? "text" : "password"}
-                                    placeholder="Confirm your password"
-                                    className="pl-10 pr-10"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                                    onClick={() =>
-                                        setShowConfirmPassword(!showConfirmPassword)
-                                    }
-                                >
-                                    {showConfirmPassword ? (
-                                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                                    ) : (
-                                        <Eye className="h-4 w-4 text-muted-foreground" />
-                                    )}
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex items-start space-x-2">
-                                <Checkbox
-                                    id="terms"
-                                    checked={acceptTerms}
-                                    onCheckedChange={() => {
-                                        setAcceptTerms(!acceptTerms);
-                                    }}
-                                    className="mt-1"
-                                />
-                                <Label
-                                    htmlFor="terms"
-                                    className="text-sm leading-relaxed"
-                                >
-                                    I agree to the{" "}
-                                    <Button
-                                        variant="link"
-                                        className="px-0 h-auto text-sm"
-                                    >
-                                        Terms of Service
-                                    </Button>{" "}
-                                    and{" "}
-                                    <Button
-                                        variant="link"
-                                        className="px-0 h-auto text-sm"
-                                    >
-                                        Privacy Policy
-                                    </Button>
-                                </Label>
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                                <Checkbox id="newsletter" />
-                                <Label htmlFor="newsletter" className="text-sm">
-                                    Send me product updates and marketing emails
-                                </Label>
-                            </div>
-                        </div>
-
-                        <Button
-                            type="submit"
-                            className="w-full gap-2"
-                            disabled={!acceptTerms}
-                        >
-                            Create Account
-                            <ArrowRight className="h-4 w-4" />
+                      <div className="flex justify-end">
+                        <Button type="submit" size="sm" className="font-medium">
+                          Get Started
                         </Button>
+                      </div>
                     </form>
+                  </Form>
+                )}
 
-                    <div className="text-center text-sm text-muted-foreground">
-                        Already have an account?{" "}
-                        <Link href="login">
-                            <Button variant="link" className="px-0 font-medium">
-                                Sign in here
-                            </Button>
-                        </Link>
-                    </div>
-                </CardContent>
-            </Card>
-        </section>
-    );
+                {step === 1 && (
+                  <Form {...form}>
+                    <form
+                      onSubmit={handleSubmit(onSubmit)}
+                      className="grid gap-y-4"
+                    >
+                      <FormField
+                        key="fname"
+                        control={control}
+                        name="fname"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter your first name"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        key="lname"
+                        control={control}
+                        name="lname"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter your last name"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        key="phone"
+                        control={control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                              <PhoneInput
+                                {...field}
+                                placeholder="07***********"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex justify-between">
+                        <Button
+                          type="button"
+                          className="font-medium"
+                          size="sm"
+                          onClick={handleBack}
+                          disabled={Number(step) === 0}
+                        >
+                          Back
+                        </Button>
+                        <Button type="submit" size="sm" className="font-medium">
+                          {Number(step) === 5 ? "Submit" : "Next"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+
+                {step === 2 && (
+                  <Form {...form}>
+                    <form
+                      onSubmit={handleSubmit(onSubmit)}
+                      className="grid gap-y-4"
+                    >
+                      <FormField
+                        key="email"
+                        control={control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>E-mail</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="email"
+                                placeholder="Enter your login email"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        key="password"
+                        control={control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                              <PasswordInput
+                                {...field}
+                                placeholder="Enter your password"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        key="confirmPassword"
+                        control={control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirm password</FormLabel>
+                            <FormControl>
+                              <PasswordInput
+                                {...field}
+                                placeholder="Confirm your password"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex justify-between">
+                        <Button
+                          type="button"
+                          className="font-medium"
+                          size="sm"
+                          onClick={handleBack}
+                          disabled={Number(step) === 0}
+                        >
+                          Back
+                        </Button>
+                        <Button type="submit" size="sm" className="font-medium">
+                          {Number(step) === 5 ? "Submit" : "Next"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+
+                {step === 3 && (
+                  <Form {...form}>
+                    <form
+                      onSubmit={handleSubmit(onSubmit)}
+                      className="grid gap-y-4"
+                    >
+                      <FormField
+                        key="idNumber"
+                        control={control}
+                        name="idNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Your ID Number</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="number"
+                                placeholder="XXXXXXXXXXXXXXXXXXX"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              For security purposes, it&apos;s essential to
+                              confirm your national ID
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex justify-between">
+                        <Button
+                          type="button"
+                          className="font-medium"
+                          size="sm"
+                          onClick={handleBack}
+                          disabled={Number(step) === 0}
+                        >
+                          Back
+                        </Button>
+                        <Button type="submit" size="sm" className="font-medium">
+                          {Number(step) === 5 ? "Submit" : "Next"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+
+                {step === 4 && (
+                  <Form {...form}>
+                    <form
+                      onSubmit={handleSubmit(onSubmit)}
+                      className="grid gap-y-4"
+                    >
+                      <FormField
+                        key="schoolName"
+                        control={control}
+                        name="schoolName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>School Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter the name of your school"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        key="schoolEmail"
+                        control={control}
+                        name="schoolEmail"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>School Email</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="email"
+                                placeholder="Enter the email of your school"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        key="schoolPhone"
+                        control={control}
+                        name="schoolPhone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>School Phone Number</FormLabel>
+                            <FormControl>
+                              <PhoneInput
+                                {...field}
+                                placeholder="07********"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        key="schoolLocation"
+                        control={control}
+                        name="schoolLocation"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>School Location</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Province / District / Sector"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex justify-between">
+                        <Button
+                          type="button"
+                          className="font-medium"
+                          size="sm"
+                          onClick={handleBack}
+                          disabled={Number(step) === 0}
+                        >
+                          Back
+                        </Button>
+                        <Button type="submit" size="sm" className="font-medium">
+                          {Number(step) === 5 ? "Submit" : "Next"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+
+                {step === 5 && (
+                  <Form {...form}>
+                    <form
+                      onSubmit={handleSubmit(onSubmit)}
+                      className="grid gap-y-4"
+                    >
+                      <FormField
+                        key="schoolLogo"
+                        control={control}
+                        name="schoolLogo"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>School Logo</FormLabel>
+                            <FormControl>
+                              <FileUpload
+                                accept="image/*"
+                                maxSize={5 * 1024 * 1024} // 5MB
+                                onValueChange={field.onChange}
+                                value={field.value ? [field.value] : []}
+                              >
+                                <FileUploadDropzone className="min-h-[120px]">
+                                  <div className="flex flex-col items-center gap-2">
+                                    <UploadIcon className="h-10 w-10 text-muted-foreground" />
+                                    <p className="text-sm text-muted-foreground">
+                                      Drag & drop or click to upload
+                                    </p>
+                                  </div>
+                                  <FileUploadTrigger asChild>
+                                    <Button variant="secondary" size="sm">
+                                      Select File
+                                    </Button>
+                                  </FileUploadTrigger>
+                                </FileUploadDropzone>
+                                {field.value?.map((file: File) => (
+                                  <FileUploadItem key={file.name} value={file}>
+                                    <FileUploadItemPreview />
+                                    <FileUploadItemMetadata />
+                                  </FileUploadItem>
+                                ))}
+                              </FileUpload>
+                            </FormControl>
+                            <FormDescription>
+                              Allowed: png, jpg, jpeg (max: 5MB)
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        key="primaryColor"
+                        control={control}
+                        name="primaryColor"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Primary Color</FormLabel>
+                            <FormControl>
+                              <ColorPicker
+                                value={field.value || "#FFFFFF"}
+                                onChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Choose your school&apos;s primary color
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        key="secondaryColorar"
+                        control={control}
+                        name="secondaryColor"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Secondary Color</FormLabel>
+                            <FormControl>
+                              <ColorPicker
+                                value={field.value || "#FFFFFF"}
+                                onChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Choose your school&apos;s secondary color
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        key="accentColor"
+                        control={control}
+                        name="accentColor"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Accent Color (Optional)</FormLabel>
+                            <FormControl>
+                              <ColorPicker
+                                value={field.value || "#FFFFFF"}
+                                onChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Choose an optional accent color
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex justify-between">
+                        <Button
+                          type="button"
+                          className="font-medium"
+                          size="sm"
+                          onClick={handleBack}
+                          disabled={Number(step) === 0}
+                        >
+                          Back
+                        </Button>
+                        <Button type="submit" size="sm" className="font-medium">
+                          {"Next"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+
+                {step === 6 && (
+                  <Form {...form}>
+                    <form
+                      onSubmit={handleSubmit(onSubmit)}
+                      className="grid gap-y-4"
+                    >
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <h3 className="font-semibold">
+                                Personal Information
+                              </h3>
+                              <div className="grid gap-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    First Name:
+                                  </span>
+                                  <span>{form.getValues().fname}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    Last Name:
+                                  </span>
+                                  <span>{form.getValues().lname}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    Phone:
+                                  </span>
+                                  <span>{form.getValues().phone}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    Email:
+                                  </span>
+                                  <span>{form.getValues().email}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    ID Number:
+                                  </span>
+                                  <span>{form.getValues().idNumber}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <h3 className="font-semibold">
+                                School Information
+                              </h3>
+                              <div className="grid gap-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    School Name:
+                                  </span>
+                                  <span>{form.getValues().schoolName}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    School Email:
+                                  </span>
+                                  <span>{form.getValues().schoolEmail}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    School Phone:
+                                  </span>
+                                  <span>{form.getValues().schoolPhone}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    Location:
+                                  </span>
+                                  <span>{form.getValues().schoolLocation}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <h3 className="font-semibold">School Branding</h3>
+                            <div className="grid gap-2">
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">
+                                  Logo:
+                                </span>
+                                {form.getValues().qcjk6lW5 && (
+                                  <div className="h-12 w-12 rounded-lg border bg-muted">
+                                    <img
+                                      src={URL.createObjectURL(
+                                        form.getValues().schoolLogo[0]
+                                      )}
+                                      alt="School Logo"
+                                      className="h-full w-full object-contain p-1"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">
+                                  Primary Color:
+                                </span>
+                                <div
+                                  className="h-4 w-4 rounded-full border"
+                                  style={{
+                                    backgroundColor:
+                                      form.getValues().primaryColor,
+                                  }}
+                                />
+                                <span>{form.getValues().primaryColor}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">
+                                  Secondary Color:
+                                </span>
+                                <div
+                                  className="h-4 w-4 rounded-full border"
+                                  style={{
+                                    backgroundColor:
+                                      form.getValues().secondaryColor,
+                                  }}
+                                />
+                                <span>{form.getValues().secondaryColor}</span>
+                              </div>
+                              {form.getValues().accentColor && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <span className="text-muted-foreground">
+                                    Accent Color:
+                                  </span>
+                                  <div
+                                    className="h-4 w-4 rounded-full border"
+                                    style={{
+                                      backgroundColor:
+                                        form.getValues().accentColor,
+                                    }}
+                                  />
+                                  <span>{form.getValues().accentColor}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="rounded-lg border p-4 bg-muted/50">
+                          <p className="text-sm text-muted-foreground">
+                            Please review all the information above carefully
+                            before submitting. By clicking submit, you confirm
+                            that all provided information is correct.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between pt-4">
+                        <Button
+                          type="button"
+                          className="font-medium"
+                          size="sm"
+                          onClick={handleBack}
+                          disabled={Number(step) === 0}
+                        >
+                          Back
+                        </Button>
+                        <Button type="submit" size="sm" className="font-medium">
+                          Submit
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+              </MotionSlide>
+            </AnimatePresence>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  );
 }
