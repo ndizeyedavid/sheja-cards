@@ -6,7 +6,10 @@ import {
   DollarSign,
   CreditCard,
   Building2,
+  Users2,
+  UserSquare2,
 } from "lucide-react";
+import RenderGreeting from "./RenderGreeting";
 
 export const SectionCards: React.FC = () => {
   return (
@@ -16,10 +19,10 @@ export const SectionCards: React.FC = () => {
         <div className="flex flex-col mb-3 sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              Money Transfer Transactions
+              <RenderGreeting />
             </h1>
             <p className="text-muted-foreground">
-              Monitor and manage your transfer transactions
+              Monitor and manage your schools analytics
             </p>
           </div>
           <Button className="flex items-center gap-2">
@@ -35,13 +38,13 @@ export const SectionCards: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    Total Volume
+                    Total Students
                   </p>
                   <p className="text-2xl font-bold text-foreground">
-                    $4,450.00
+                    {Number(4450).toLocaleString()}
                   </p>
                 </div>
-                <DollarSign className="w-8 h-8 text-green-600" />
+                <Users2 className="w-8 h-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
@@ -51,9 +54,9 @@ export const SectionCards: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    Platform Revenue
+                    Classes
                   </p>
-                  <p className="text-2xl font-bold text-foreground">$89.00</p>
+                  <p className="text-2xl font-bold text-foreground">15</p>
                 </div>
                 <Building2 className="w-8 h-8 text-blue-600" />
               </div>
@@ -65,11 +68,11 @@ export const SectionCards: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    Total Fees
+                    Staff Members
                   </p>
-                  <p className="text-2xl font-bold text-foreground">$297.50</p>
+                  <p className="text-2xl font-bold text-foreground">4</p>
                 </div>
-                <CreditCard className="w-8 h-8 text-orange-600" />
+                <UserSquare2 className="w-8 h-8 text-orange-600" />
               </div>
             </CardContent>
           </Card>
@@ -79,9 +82,11 @@ export const SectionCards: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    Transactions
+                    Current Academic Year
                   </p>
-                  <p className="text-2xl font-bold text-foreground">3</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    2024 / 2025
+                  </p>
                 </div>
                 <Calendar className="w-8 h-8 text-purple-600" />
               </div>

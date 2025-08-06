@@ -26,7 +26,7 @@ import {
   AlertDialogHeader,
 } from "@/components/ui/alert-dialog";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signin } from "@/services/auth.service";
 
 const loginSchema = z
@@ -43,6 +43,7 @@ export default function Page() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isNew, setIsNew] = useState<boolean>(false);
   const searcParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     setIsNew(searcParams.get("new") ? true : false);
@@ -51,6 +52,7 @@ export default function Page() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -65,11 +67,16 @@ export default function Page() {
       const user = await signin(data);
       console.log(user);
       toast.success("Login successful");
+      router.replace(`/dashboard${searcParams.get("new") ? "?new=true" : ""}`);
+      reset();
     } catch (error: any) {
-      const errorMessage: string =
-        error.response.data?.message || "Login failed";
-      toast.error(errorMessage);
-      console.error(error);
+      console.error(error.response);
+      const errorMessage: string = error.response?.message || "Login failed";
+      toast.error(
+        error.response.status === 400
+          ? "Incorrect email or password"
+          : errorMessage
+      );
     }
   };
 

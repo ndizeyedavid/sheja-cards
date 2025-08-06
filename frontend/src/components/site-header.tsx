@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
+import { AcademicYearSelector } from "./AcademicYearSelector";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -18,10 +19,8 @@ export function SiteHeader() {
         <h1 className="text-base font-medium capitalize">
           {pathname.split("/").pop()}
         </h1>
-        <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-            GitHub
-          </Button>
+        <div className="ml-14 flex items-center gap-2">
+          <AcademicYearSelector />
         </div>
       </div>
     </header>

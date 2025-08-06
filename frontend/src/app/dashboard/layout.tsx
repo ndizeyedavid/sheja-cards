@@ -1,12 +1,22 @@
+"use client";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SiteHeader } from "@/components/site-header";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import pb from "@/lib/pb";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!pb.authStore.isValid) return router.replace("/auth/login");
+  }, []);
+
   return (
     <SidebarProvider
       style={
