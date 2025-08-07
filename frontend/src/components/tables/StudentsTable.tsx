@@ -138,7 +138,7 @@ export default function StudentsTable({
                 <TableBody>
                   {isLoading ? (
                     // Loading skeletons
-                    <Loading />
+                    <Loading category="default" />
                   ) : (
                     filteredStudents.map((student) => (
                       <TableRow key={student.id}>

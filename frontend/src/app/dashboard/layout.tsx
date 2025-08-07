@@ -5,36 +5,37 @@ import { SiteHeader } from "@/components/site-header";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import pb from "@/lib/pb";
+import { Toaster } from "sonner";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const router = useRouter();
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+    const router = useRouter();
 
-  useEffect(() => {
-    if (!pb.authStore.isValid) return router.replace("/auth/login");
-  }, []);
+    useEffect(() => {
+        if (!pb.authStore.isValid) return router.replace("/auth/login");
+    }, []);
 
-  return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            {children}
-          </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-  );
+    return (
+        <>
+            <Toaster richColors position="top-right" />
+
+            <SidebarProvider
+                style={
+                    {
+                        "--sidebar-width": "calc(var(--spacing) * 72)",
+                        "--header-height": "calc(var(--spacing) * 12)",
+                    } as React.CSSProperties
+                }
+            >
+                <AppSidebar variant="inset" id="no-print" />
+                <SidebarInset>
+                    <SiteHeader />
+                    <div className="flex flex-1 flex-col">
+                        <div className="@container/main flex flex-1 flex-col gap-2">
+                            {children}
+                        </div>
+                    </div>
+                </SidebarInset>
+            </SidebarProvider>
+        </>
+    );
 }

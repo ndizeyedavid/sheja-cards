@@ -10,23 +10,17 @@ import {
 import { IconFilter } from "@tabler/icons-react";
 
 interface FiltercardProps {
-  academicYears: string[];
   classes: string[];
   setIsLoading: (loading: boolean) => void;
   setIsFiltered: (filtered: boolean) => void;
-  selectedYear: string;
-  setSelectedYear: (year: string) => void;
   selectedClass: string;
   setSelectedClass: (className: string) => void;
 }
 
 export default function Filtercard({
-  academicYears,
   classes,
   setIsLoading,
   setIsFiltered,
-  selectedYear,
-  setSelectedYear,
   selectedClass,
   setSelectedClass,
 }: FiltercardProps) {
@@ -44,25 +38,16 @@ export default function Filtercard({
         <CardTitle className="text-lg font-medium">Filter Students</CardTitle>
       </CardHeader>
       <CardContent>
+        <p>Select Class</p>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Academic Year" />
-            </SelectTrigger>
-            <SelectContent>
-              {academicYears.map((year) => (
-                <SelectItem key={year} value={year}>
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
           <Select value={selectedClass} onValueChange={setSelectedClass}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select Class" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="-" disabled>
+                - Choose class -
+              </SelectItem>
               {classes.map((className) => (
                 <SelectItem key={className} value={className}>
                   {className}
