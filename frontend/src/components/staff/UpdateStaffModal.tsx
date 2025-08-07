@@ -30,51 +30,52 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { IconPlus } from "@tabler/icons-react";
+import { IconEdit } from "@tabler/icons-react";
 import { Staff } from "@/types/staff";
-import { createStaff } from "@/services/staff.service";
+import { updateStaff } from "@/services/staff.service";
 import { toast } from "sonner";
 import { PhoneInput } from "../form-input/PhoneInput";
 
 const staffSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.email("Invalid email address"),
-    role: z.enum(["DOS", "BURSAR", "TEACHER", "PATRON"]),
+    role: z.enum(["Headmaster", "DOS", "Bursar", "Teacher", "Secretary", "Librarian"]),
     phone: z.string().min(1, "Phone number is required"),
     idNumber: z.string().min(1, "ID number is required"),
 });
 
 type StaffFormValues = z.infer<typeof staffSchema>;
 
-interface AddStaffModalProps {
-    onAddStaff: (staff: Staff) => void;
+interface UpdateStaffModalProps {
+    staff: Staff;
+    onUpdateStaff: (staff: Staff) => void;
 }
 
-export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
+export function UpdateStaffModal({ staff, onUpdateStaff }: UpdateStaffModalProps) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const form = useForm<StaffFormValues>({
         resolver: zodResolver(staffSchema),
         defaultValues: {
-            name: "",
-            email: "",
-            role: "TEACHER",
-            phone: "",
-            idNumber: "",
+            name: staff.name,
+            email: staff.email,
+            role: staff.role,
+            phone: staff.phone,
+            idNumber: staff.idNumber,
         },
     });
 
     const onSubmit = async (data: StaffFormValues) => {
         try {
             setLoading(true);
-            const newStaff = await createStaff(data);
-            onAddStaff({ ...newStaff });
-            toast.success("Staff member added successfully");
+            const updatedStaff = await updateStaff(staff.id, data);
+            onUpdateStaff({ ...updatedStaff });
+            toast.success("Staff member updated successfully");
             setOpen(false);
-            form.reset();
         } catch (error: any) {
-            toast.error("Failed to add staff member");
+            toast.error("Failed to update staff member");
+            // console.log(staff.id);
             console.error(error.response);
         } finally {
             setLoading(false);
@@ -84,16 +85,16 @@ export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <IconPlus className="mr-2 h-4 w-4" />
-                    Add Staff
+                <Button variant="ghost" className="flex items-center gap-2">
+                    <IconEdit className="h-4 w-4" />
+                    Edit
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Add New Staff Member</DialogTitle>
+                    <DialogTitle>Edit Staff Member</DialogTitle>
                     <DialogDescription>
-                        Fill in the details to add a new staff member.
+                        Update the staff member's information.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -105,29 +106,25 @@ export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="John Smith" {...field} />
+                                        <Input {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <FormField
+                        {/* <FormField
                             control={form.control}
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="email"
-                                            placeholder="john.smith@school.com"
-                                            {...field}
-                                        />
+                                        <Input type="email" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        />
+                        /> */}
                         <FormField
                             control={form.control}
                             name="role"
@@ -180,7 +177,7 @@ export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
                                 <FormItem>
                                     <FormLabel>ID Number</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="ID001" {...field} />
+                                        <Input {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -188,7 +185,7 @@ export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
                         />
                         <DialogFooter>
                             <Button type="submit" disabled={loading}>
-                                {loading ? "Adding..." : "Add Staff"}
+                                {loading ? "Updating..." : "Update Staff"}
                             </Button>
                         </DialogFooter>
                     </form>

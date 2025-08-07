@@ -36,7 +36,7 @@ const academicYears = [
 
 export function AcademicYearSelector() {
     const [open, setOpen] = useState(false);
-    const [value, setValue] = useState("");
+    const [value, setValue] = useState(academicYears[0].value);
 
     useEffect(() => {
         localStorage.setItem("academicYear", value);
