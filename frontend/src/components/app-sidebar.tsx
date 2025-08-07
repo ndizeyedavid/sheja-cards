@@ -20,12 +20,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import pb from "@/lib/pb";
+
+const user: any = pb.authStore.record;
 
 const data = {
   user: {
-    name: "Admin User",
-    email: "admin@shejacards.com",
-    avatar: "/avatars/admin.png",
+    name: user?.name,
+    email: user?.email,
+    avatar: user?.avatar,
   },
   navMain: [
     {

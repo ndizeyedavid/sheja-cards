@@ -1,6 +1,6 @@
 export interface Classes {
-  id: number;
-  name: string;
-  combination: string;
-  academicYear: string;
+    id: string;
+    name: string;
+    combination: string;
+    academicYear: string;
 }

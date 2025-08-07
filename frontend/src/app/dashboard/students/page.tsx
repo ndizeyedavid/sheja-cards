@@ -4,9 +4,7 @@ import { useState } from "react";
 import Filtercard from "@/components/cards/Filtercard";
 import StudentsTable from "@/components/tables/StudentsTable";
 
-// Mock data
-const academicYears = ["2024", "2023", "2022"];
-const classes = ["Form 1", "Form 2", "Form 3", "Form 4"];
+const classes = ["S1", "S2", "S3", "S4 ACC"];
 const students = [
   {
     id: 1,
@@ -23,7 +21,7 @@ const students = [
 
 export default function page() {
   const [selectedYear, setSelectedYear] = useState<string>("2024");
-  const [selectedClass, setSelectedClass] = useState<string>("Form 1");
+  const [selectedClass, setSelectedClass] = useState<string>("-");
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,12 +30,9 @@ export default function page() {
       <div className="grid gap-4 px-4 lg:px-6">
         {/* Filter Card */}
         <Filtercard
-          academicYears={academicYears}
           classes={classes}
           setIsLoading={setIsLoading}
           setIsFiltered={setIsFiltered}
-          selectedYear={selectedYear}
-          setSelectedYear={setSelectedYear}
           selectedClass={selectedClass}
           setSelectedClass={setSelectedClass}
         />
