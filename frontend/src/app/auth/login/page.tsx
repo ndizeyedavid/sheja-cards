@@ -65,7 +65,7 @@ export default function Page() {
     try {
       console.log(data);
       const user = await signin(data);
-      console.log(user);
+      // console.log(user);
       toast.success("Login successful");
       router.replace(`/dashboard${searcParams.get("new") ? "?new=true" : ""}`);
       reset();

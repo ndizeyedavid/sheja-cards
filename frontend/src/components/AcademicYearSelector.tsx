@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -18,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useEffect, useState } from "react";
 
 const academicYears = [
   {
@@ -39,8 +39,13 @@ const academicYears = [
 ];
 
 export function AcademicYearSelector() {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(academicYears[0].value);
+
+  useEffect(() => {
+    localStorage.setItem("academicYear", value);
+    console.log(value);
+  }, [value]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -68,6 +73,7 @@ export function AcademicYearSelector() {
                 <CommandItem
                   key={academicYear.value}
                   value={academicYear.value}
+                  autoFocus
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? "" : currentValue);
                     setOpen(false);
