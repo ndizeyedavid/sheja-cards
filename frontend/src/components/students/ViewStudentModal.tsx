@@ -10,6 +10,7 @@ import {
 import { IconEye } from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "../tables/StatusBadge";
 
 interface ViewStudentModalProps {
     student: any;
@@ -21,8 +22,12 @@ export function ViewStudentModal({ student }: ViewStudentModalProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button
+                    variant="ghost"
+                    className="h-8 w-full flex items-center justify-start p-0 text-gray-700"
+                >
                     <IconEye className="h-4 w-4" />
+                    Details
                 </Button>
             </DialogTrigger>
             <DialogContent>
@@ -63,18 +68,13 @@ export function ViewStudentModal({ student }: ViewStudentModalProps) {
                         <div>
                             <p className="text-sm font-medium">Class</p>
                             <p className="text-sm text-muted-foreground">
-                                {student.class}
+                                {student.expand.Class.name}{" "}
+                                {student.expand.Class.combination}
                             </p>
                         </div>
                         <div>
                             <p className="text-sm font-medium">Status</p>
-                            <Badge
-                                variant={
-                                    student.status === "ACTIVE" ? "default" : "secondary"
-                                }
-                            >
-                                {student.status}
-                            </Badge>
+                            <StatusBadge status={student.status} />
                         </div>
                     </div>
                 </div>

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
     Dialog,
     DialogContent,
@@ -19,9 +20,13 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { updateStudent } from "@/services/students.service";
 import { IconEdit } from "@tabler/icons-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -29,12 +34,20 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { DatePicker } from "../DatePicker";
+import { ProfileUploader } from "../ProfileUploader";
 
 const studentSchema = z.object({
     name: z.string().min(1, "Name is required"),
     gender: z.enum(["MALE", "FEMALE"]),
-    dateOfBirth: z.string().min(1, "Date of birth is required"),
+    dateOfBirth: z.date("Date of birth is required"),
     status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED", "GRADUATED"]),
+    profileImage: z
+        .instanceof(File)
+        .optional()
+        .refine((file) => !file || file.size <= 5 * 1024 * 1024, {
+            message: "Max file size is 5MB",
+        }),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
@@ -56,7 +69,7 @@ export function UpdateStudentModal({
         defaultValues: {
             name: student.name,
             gender: student.gender,
-            dateOfBirth: new Date(student.dateOfBirth).toISOString().split("T")[0],
+            dateOfBirth: student.dateOfBirth ? new Date(student.dateOfBirth) : undefined,
             status: student.status,
         },
     });
@@ -78,8 +91,12 @@ export function UpdateStudentModal({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button
+                    variant="ghost"
+                    className="h-8 w-full flex items-center justify-start p-0 text-gray-700"
+                >
                     <IconEdit className="h-4 w-4" />
+                    Edit
                 </Button>
             </DialogTrigger>
             <DialogContent>
@@ -88,6 +105,22 @@ export function UpdateStudentModal({
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="profileImage"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <ProfileUploader
+                                            value={field.value || null}
+                                            onChange={field.onChange}
+                                            disabled={isLoading}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="name"
@@ -132,7 +165,11 @@ export function UpdateStudentModal({
                                 <FormItem>
                                     <FormLabel>Date of Birth</FormLabel>
                                     <FormControl>
-                                        <Input type="date" {...field} />
+                                        <DatePicker
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            disabled={isLoading}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

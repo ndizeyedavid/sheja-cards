@@ -9,6 +9,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { IconFilter } from "@tabler/icons-react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 interface FiltercardProps {
     classes: string[];
@@ -25,16 +26,27 @@ export default function Filtercard({
     selectedClass,
     setSelectedClass,
 }: FiltercardProps) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const handleFilter = async () => {
+        if (selectedClass === "-") return;
+
+        const params = new URLSearchParams(searchParams);
+        params.set("class", selectedClass);
+        router.replace(`${pathname}?${params.toString()}`);
+
+        router.push(`${pathname}?${params.toString()}`);
+
         setIsLoading(true);
         setIsFiltered(true);
         // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        // await new Promise((resolve) => setTimeout(resolve, 1500));
         setIsLoading(false);
     };
 
     return (
-        <Card>
+        <Card id="no-print">
             <CardHeader>
                 <CardTitle className="text-lg font-medium">Filter Students</CardTitle>
             </CardHeader>

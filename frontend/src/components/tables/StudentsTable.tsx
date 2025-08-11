@@ -39,6 +39,12 @@ import { AddStudentModal } from "../students/AddStudentModal";
 import { UpdateStudentModal } from "../students/UpdateStudentModal";
 import { ViewStudentModal } from "../students/ViewStudentModal";
 import { deleteStudent } from "@/services/students.service";
+import { toast } from "sonner";
+import { StatusBadge } from "./StatusBadge";
+import { IconDownload } from "@tabler/icons-react";
+import { generateTemplate } from "./excel/Template";
+import { handleTemplate } from "./excel/UploadTemplate";
+import pb from "@/lib/pb";
 
 interface StudentsTableProps {
     students: Students[];
@@ -57,22 +63,17 @@ export default function StudentsTable({
 }: StudentsTableProps) {
     const [searchQuery, setSearchQuery] = useState("");
 
+    // return console.log(students);
+
     const filteredStudents = isFiltered
         ? students.filter(
-              (student) =>
-                  student.class === selectedClass &&
+              (student: any) =>
+                  student.expand.Class.name + " " + student.expand.Class.combination ===
+                      selectedClass &&
                   (searchQuery === "" ||
                       student.name.toLowerCase().includes(searchQuery.toLowerCase()))
           )
         : [];
-
-    const handleViewStudent = (studentId: string) => {
-        console.log("View student:", studentId);
-    };
-
-    const handleEditStudent = (studentId: string) => {
-        console.log("Edit student:", studentId);
-    };
 
     const handleAddStudent = (newStudent: any) => {
         setStudents([...students, newStudent]);
@@ -118,7 +119,10 @@ export default function StudentsTable({
                         </Badge>
                     </CardHeader>
                     <CardContent>
-                        <div className="mb-4 flex items-center justify-between">
+                        <div
+                            className="mb-4 flex items-center justify-between"
+                            id="no-print"
+                        >
                             <div className="relative flex-1 w-full max-w-sm">
                                 <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -130,15 +134,35 @@ export default function StudentsTable({
                             </div>
 
                             <div className="flex items-center">
-                                <Button variant="outline" className="ml-4">
-                                    <IconUpload className="mr-2 h-4 w-4" />
-                                    Bulk add
-                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" className="ml-4">
+                                            <IconUpload className="mr-2 h-4 w-4" />
+                                            Bulk add
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                generateTemplate(selectedClass)
+                                            }
+                                        >
+                                            <IconDownload className="mr-2 h-4 w-4" />
+                                            Download Template
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => handleTemplate(selectedClass)}
+                                        >
+                                            <IconUpload className="mr-2 h-4 w-4" />
+                                            Upload Students
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                                 <AddStudentModal
                                     onAddStudent={handleAddStudent}
                                     selectedClass={selectedClass}
                                 />
-                                <Button className="ml-4">
+                                <Button className="ml-4" onClick={() => window.print()}>
                                     <IconPrinter className="size-4" />
                                 </Button>
                             </div>
@@ -164,21 +188,26 @@ export default function StudentsTable({
                                         // Loading skeletons
                                         <Loading category="default" />
                                     ) : (
-                                        filteredStudents.map((student) => (
+                                        filteredStudents.map((student: any) => (
                                             <TableRow key={student.id}>
+                                                {/* console.log(student) */}
                                                 <TableCell>
                                                     {student.registrationNumber}
                                                 </TableCell>
                                                 <TableCell className="flex items-center gap-3">
                                                     <Avatar className="h-8 w-8">
                                                         <AvatarImage
-                                                            src={student.avatar}
+                                                            src={pb.files.getURL(
+                                                                student,
+                                                                student.profileImage
+                                                            )}
                                                             alt={student.name}
                                                         />
                                                         <AvatarFallback>
                                                             {student.name
                                                                 .split(" ")
-                                                                .map((n) => n[0])
+                                                                .map((n: any) => n[0])
+
                                                                 .join("")}
                                                         </AvatarFallback>
                                                     </Avatar>
@@ -190,22 +219,21 @@ export default function StudentsTable({
                                                 </TableCell>
                                                 <TableCell>{student.gender}</TableCell>
                                                 <TableCell>
-                                                    {new Date(
-                                                        student.dateOfBirth
-                                                    ).toLocaleDateString()}
+                                                    {student.dateOfBirth
+                                                        ? new Date(
+                                                              student.dateOfBirth
+                                                          ).toLocaleDateString()
+                                                        : "-"}
                                                 </TableCell>
-                                                <TableCell>{student.class}</TableCell>
-
                                                 <TableCell>
-                                                    <Badge
-                                                        variant={
-                                                            student.status === "Active"
-                                                                ? "default"
-                                                                : "secondary"
-                                                        }
-                                                    >
-                                                        {student.status}
-                                                    </Badge>
+                                                    {student.expand.Class.name +
+                                                        " " +
+                                                        student.expand.Class.combination}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <StatusBadge
+                                                        status={student.status}
+                                                    />
                                                 </TableCell>
                                                 <TableCell>
                                                     <DropdownMenu>

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
     Dialog,
     DialogContent,
@@ -19,9 +20,13 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { createStudent } from "@/services/students.service";
 import { IconUserPlus } from "@tabler/icons-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -29,13 +34,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { DatePicker } from "../DatePicker";
+import { ProfileUploader } from "../ProfileUploader";
 
 const studentSchema = z.object({
     name: z.string().min(1, "Name is required"),
     gender: z.enum(["MALE", "FEMALE"]),
-    dateOfBirth: z.string().min(1, "Date of birth is required"),
+    dateOfBirth: z.date("Date of birth is required"),
     registrationNumber: z.string().optional(),
     class: z.string().min(1, "Class is required"),
+    profileImage: z
+        .instanceof(File)
+        .optional()
+        .refine((file) => !file || file.size <= 5 * 1024 * 1024, {
+            message: "Max file size is 5MB",
+        }),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
@@ -59,7 +72,11 @@ export function AddStudentModal({ onAddStudent, selectedClass }: AddStudentModal
     const onSubmit = async (data: StudentFormValues) => {
         try {
             setIsLoading(true);
-            const newStudent = await createStudent(data);
+            // return console.log(data);
+            const newStudent = await createStudent({
+                data,
+                Class: selectedClass,
+            });
             onAddStudent(newStudent);
             toast.success("Student added successfully");
             setOpen(false);
@@ -86,6 +103,22 @@ export function AddStudentModal({ onAddStudent, selectedClass }: AddStudentModal
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="profileImage"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <ProfileUploader
+                                            value={field.value || null}
+                                            onChange={field.onChange}
+                                            disabled={isLoading}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="name"
@@ -130,7 +163,11 @@ export function AddStudentModal({ onAddStudent, selectedClass }: AddStudentModal
                                 <FormItem>
                                     <FormLabel>Date of Birth</FormLabel>
                                     <FormControl>
-                                        <Input type="date" {...field} />
+                                        <DatePicker
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            disabled={isLoading}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

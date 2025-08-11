@@ -33,6 +33,17 @@ export default function page() {
 
     useEffect(() => {
         (async () => {
+            const params = new URLSearchParams(window.location.search);
+            const classParam = params.get("class");
+            if (classParam) {
+                setSelectedClass(classParam || "-");
+                setIsFiltered(true);
+            }
+        })();
+    }, []);
+
+    useEffect(() => {
+        (async () => {
             const res: any = await fetchClasses();
             // console.log(res);
             setClasses(res.map((item: any) => item.name + " " + item.combination));
