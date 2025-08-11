@@ -122,7 +122,8 @@
 }
 
 @media print {
-    [data-slot="sidebar"] {
+    [data-slot="sidebar"],
+    #no-print {
         display: none !important;
     }
     .SidebarTrigger {

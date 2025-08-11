@@ -1,15 +1,13 @@
-"use client";
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -22,7 +20,13 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { createStudent } from "@/services/students.service";
+import { IconUserPlus } from "@tabler/icons-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -30,74 +34,91 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { IconPlus } from "@tabler/icons-react";
-import { Staff } from "@/types/staff";
-import { createStaff } from "@/services/staff.service";
-import { toast } from "sonner";
-import { PhoneInput } from "../form-input/PhoneInput";
+import { DatePicker } from "../DatePicker";
+import { ProfileUploader } from "../ProfileUploader";
 
-const staffSchema = z.object({
+const studentSchema = z.object({
     name: z.string().min(1, "Name is required"),
-    email: z.email("Invalid email address"),
-    role: z.enum(["DOS", "BURSAR", "TEACHER", "PATRON"]),
-    phone: z.string().min(1, "Phone number is required"),
-    idNumber: z.string().min(1, "ID number is required"),
+    gender: z.enum(["MALE", "FEMALE"]),
+    dateOfBirth: z.date("Date of birth is required"),
+    registrationNumber: z.string().optional(),
+    class: z.string().min(1, "Class is required"),
+    profileImage: z
+        .instanceof(File)
+        .optional()
+        .refine((file) => !file || file.size <= 5 * 1024 * 1024, {
+            message: "Max file size is 5MB",
+        }),
 });
 
-type StaffFormValues = z.infer<typeof staffSchema>;
+type StudentFormValues = z.infer<typeof studentSchema>;
 
-interface AddStaffModalProps {
-    onAddStaff: (staff: Staff) => void;
+interface AddStudentModalProps {
+    onAddStudent: (student: any) => void;
+    selectedClass: string;
 }
 
-export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
+export function AddStudentModal({ onAddStudent, selectedClass }: AddStudentModalProps) {
     const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const form = useForm<StaffFormValues>({
-        resolver: zodResolver(staffSchema),
+    const form = useForm<StudentFormValues>({
+        resolver: zodResolver(studentSchema),
         defaultValues: {
-            name: "",
-            email: "",
-            role: "TEACHER",
-            phone: "",
-            idNumber: "",
+            class: selectedClass,
         },
     });
 
-    const onSubmit = async (data: StaffFormValues) => {
+    const onSubmit = async (data: StudentFormValues) => {
         try {
-            setLoading(true);
-            const newStaff = await createStaff(data);
-            onAddStaff({ ...newStaff });
-            toast.success("Staff member added successfully");
+            setIsLoading(true);
+            // return console.log(data);
+            const newStudent = await createStudent({
+                data,
+                Class: selectedClass,
+            });
+            onAddStudent(newStudent);
+            toast.success("Student added successfully");
             setOpen(false);
             form.reset();
         } catch (error: any) {
-            toast.error("Failed to add staff member");
-            console.error(error.response);
+            toast.error(error.message || "Failed to add student");
+            console.error(error);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <IconPlus className="mr-2 h-4 w-4" />
-                    Add Staff
+                <Button className="ml-4">
+                    <IconUserPlus className="mr-2 h-4 w-4" />
+                    New Student
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Add New Staff Member</DialogTitle>
-                    <DialogDescription>
-                        Fill in the details to add a new staff member.
-                    </DialogDescription>
+                    <DialogTitle>Add New Student</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="profileImage"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <ProfileUploader
+                                            value={field.value || null}
+                                            onChange={field.onChange}
+                                            disabled={isLoading}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="name"
@@ -105,7 +126,7 @@ export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="John Smith" {...field} />
+                                        <Input {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -113,43 +134,22 @@ export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="email"
+                            name="gender"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="email"
-                                            placeholder="john.smith@school.com"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="role"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Role</FormLabel>
+                                    <FormLabel>Gender</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={field.value}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a role" />
+                                                <SelectValue placeholder="Select gender" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="DOS">DOS</SelectItem>
-                                            <SelectItem value="BURSAR">Bursar</SelectItem>
-                                            <SelectItem value="TEACHER">
-                                                Teacher
-                                            </SelectItem>
-                                            <SelectItem value="PATRON">Patron</SelectItem>
+                                            <SelectItem value="MALE">Male</SelectItem>
+                                            <SelectItem value="FEMALE">Female</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -157,40 +157,38 @@ export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
                             )}
                         />
                         <FormField
-                            key="phone"
                             control={form.control}
-                            name="phone"
+                            name="dateOfBirth"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Phone Number</FormLabel>
+                                    <FormLabel>Date of Birth</FormLabel>
                                     <FormControl>
-                                        <PhoneInput
-                                            {...field}
-                                            placeholder="07***********"
-                                            autoComplete="off"
+                                        <DatePicker
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            disabled={isLoading}
                                         />
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="idNumber"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>ID Number</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="ID001" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <DialogFooter>
-                            <Button type="submit" disabled={loading}>
-                                {loading ? "Adding..." : "Add Staff"}
-                            </Button>
-                        </DialogFooter>
+                        <FormField
+                            control={form.control}
+                            name="registrationNumber"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Registration Number (Optional)</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading ? "Adding..." : "Add Student"}
+                        </Button>
                     </form>
                 </Form>
             </DialogContent>

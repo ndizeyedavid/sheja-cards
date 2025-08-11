@@ -13,13 +13,19 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import pb from "@/lib/pb"; // 👈 Make sure this points to your PocketBase instance
-import { Loader2 } from "lucide-react"; // 👈 Optional spinner icon
+import pb from "@/lib/pb";
+import { Loader2 } from "lucide-react";
 
 interface Student {
-  gender: "Male" | "Female";
+  gender: "MALE" | "FEMALE";
   class: string;
   school: string;
+  expand: {
+    Class: {
+      name: string;
+      combination: string;
+    };
+  };
 }
 
 interface ChartData {
@@ -45,19 +51,23 @@ export function StudentDistribution() {
           .collection("students")
           .getFullList({
             filter: `school="${schoolId}" && academicYear="${academicYear}"`,
+            expand: "Class",
             sort: "-created", // optional
           });
 
         const grouped: Record<string, { male: number; female: number }> = {};
 
         students.forEach((student) => {
-          const className = student.class || "Unassigned";
+          const className =
+            student.expand.Class.name +
+              " " +
+              student.expand.Class.combination || "Unassigned";
           if (!grouped[className]) {
             grouped[className] = { male: 0, female: 0 };
           }
-          if (student.gender === "Male") {
+          if (student.gender === "MALE") {
             grouped[className].male++;
-          } else if (student.gender === "Female") {
+          } else if (student.gender === "FEMALE") {
             grouped[className].female++;
           }
         });
