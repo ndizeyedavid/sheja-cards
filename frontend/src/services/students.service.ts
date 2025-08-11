@@ -28,7 +28,15 @@ export const fetchStudents = async (selectedClass: string) => {
 
     return res;
 };
-
+export const classStudents = async (classId: string) => {
+    const schoolId = pb.authStore.record?.school;
+    const academicYear = localStorage.getItem("academicYear");
+    const res = await pb.collection("students").getFullList({
+        expand: "Class",
+        filter: `school = "${schoolId}" && academicYear="${academicYear}" && isDeleted = false && Class.id="${classId}"`,
+    });
+    return res;
+};
 export const createStudent = async ({ data, Class }: { data: object; Class: any }) => {
     const schoolId = pb.authStore.record?.school;
     const academicYear = localStorage.getItem("academicYear");
