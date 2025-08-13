@@ -1,0 +1,153 @@
+:root {
+    --primary: #670409;
+    --secondary: #f19c00;
+    --text: #04496b;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+html {
+    background-color: #f8f8f8 !important;
+}
+
+body {
+    background-color: #f8f8f8;
+    /* overflow-x: hidden; */
+}
+
+.card-container {
+    width: 800px;
+    height: 600px;
+    overflow: hidden;
+    background-color: black;
+}
+
+.std-card {
+    position: relative;
+    width: 100%;
+    /* width: 100vw !important; */
+    height: 100vh;
+    /* background-color: #f8f8f8; */
+}
+.header {
+    width: 100%;
+}
+.header img {
+    width: 100%;
+}
+/* .card-details{} */
+.footer {
+    position: absolute;
+    bottom: 30px;
+}
+
+.card-details {
+    position: relative;
+    top: 20px;
+    left: 80px;
+}
+
+.card-details .img-container {
+    position: relative;
+    @apply size-[200px];
+    border: 20px solid var(--primary);
+    border-radius: 100%;
+    padding: 5px;
+    z-index: 20;
+}
+
+.img-container img {
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+}
+
+.img-ribbon {
+    position: absolute;
+    top: 34px;
+    left: 180px;
+    padding: 0;
+    margin: 0;
+    background: linear-gradient(to right, var(--secondary) 20%, #f8f8f8 80%);
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    align-items: center;
+    z-index: 0;
+}
+
+.img-ribbon .side {
+    width: 100px;
+    height: 100%;
+}
+
+.info {
+    position: absolute;
+    top: 125px;
+    left: 320px;
+    font-size: 27px;
+    color: var(--text);
+    font-weight: 800;
+    width: 100%;
+}
+
+td {
+    text-transform: uppercase;
+}
+
+.year {
+    position: absolute;
+    top: 30px;
+    left: 90px;
+    font-size: 35px;
+    font-weight: bolder;
+    color: white;
+    font-style: italic;
+    letter-spacing: 5px;
+}
+
+@media print {
+    @page {
+        orientation: landscape;
+        /* Change to 'portrait' for portrait orientation */
+        size: 3.37in 2.125in landscape;
+        /* size: A4 landscape; */
+    }
+
+    #nav {
+        display: none;
+    }
+}
+
+.qr {
+    position: absolute;
+    right: 500px;
+    z-index: 9999999999999;
+    bottom: 30px;
+    width: 200px;
+    height: 200px;
+    background-color: white;
+}
+
+.qr img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.qr .logo {
+    /* display: none; */
+    background-color: white;
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

@@ -66,7 +66,7 @@ export function RecentStudents() {
                 </TableRow>
               ) : (
                 students.map((student: Istudent) => (
-                  <TableRow key={student.registrationNumber}>
+                  <TableRow key={student.registrationNumber + Math.random()}>
                     <TableCell>{student.registrationNumber}</TableCell>
                     <TableCell className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
