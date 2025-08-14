@@ -222,57 +222,6 @@ export default function ProfilePage() {
                     .toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
-
-              {/* Avatar upload section */}
-              <div className="absolute -right-2 -top-2 flex gap-1">
-                <label htmlFor="avatar-upload">
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="h-8 w-8 rounded-full cursor-pointer"
-                    disabled={uploadingAvatar}
-                  >
-                    {uploadingAvatar ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                    ) : (
-                      <IconCamera className="h-4 w-4" />
-                    )}
-                  </Button>
-                </label>
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileSelect}
-                />
-
-                {avatarFile && (
-                  <div className="flex gap-1">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-8 w-8 rounded-full bg-green-50 hover:bg-green-100"
-                      onClick={handleAvatarUpload}
-                      disabled={uploadingAvatar}
-                    >
-                      <IconCheck className="h-4 w-4 text-green-600" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-8 w-8 rounded-full bg-red-50 hover:bg-red-100"
-                      onClick={() => {
-                        setAvatarFile(null);
-                        setAvatarPreview("");
-                      }}
-                      disabled={uploadingAvatar}
-                    >
-                      <IconX className="h-4 w-4 text-red-600" />
-                    </Button>
-                  </div>
-                )}
-              </div>
             </div>
 
             <div className="space-y-1 text-center sm:text-left">
