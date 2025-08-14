@@ -1,0 +1,19 @@
+@media print {
+  @page {
+    size: 4.125in 6.575in; /* Width x Height */
+    margin: 0;
+  }
+
+  #print-area > div {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-right: 0;
+    margin-left: 0;
+  }
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background-color: #fff !important;
+  }
+}

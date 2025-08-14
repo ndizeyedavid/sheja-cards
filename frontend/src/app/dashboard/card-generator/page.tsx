@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { ClassSelector } from "./ClassSelector";
 import { classStudents } from "@/services/students.service";
 import pb from "@/lib/pb";
+import Link from "next/link";
 
 // Mock data
 const classes = ["Form 1", "Form 2", "Form 3", "Form 4"];
@@ -69,15 +70,17 @@ export default function CardGeneratorPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Student Card Generator</CardTitle>
-            <div className="flex gap-2">
+            <div className={`flex gap-2 ${!selectedClass?.id && "hidden"}`}>
               <Button variant="outline" onClick={handleExportPDF}>
                 <IconPrinter className="mr-2 h-4 w-4" />
                 Print Selected
               </Button>
-              <Button onClick={handleExportPDF}>
-                <IconDownload className="mr-2 h-4 w-4" />
-                Export All as PDF
-              </Button>
+              <Link href={"/print/" + selectedClass?.id}>
+                <Button onClick={handleExportPDF}>
+                  <IconDownload className="mr-2 h-4 w-4" />
+                  Export All as PDF
+                </Button>
+              </Link>
             </div>
           </CardHeader>
           <CardContent>
