@@ -72,7 +72,8 @@ export default function page() {
         router.push("/auth/login?new=true");
       }
     } catch (error: any) {
-      console.error(error.response);
+      console.error("ERROR: ", error);
+      console.error("PB ERROR: ", error.response);
       toast.error("Account creation failed");
     } finally {
       setIsLoading(false);

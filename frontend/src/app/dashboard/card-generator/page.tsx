@@ -54,8 +54,14 @@ export default function CardGeneratorPage() {
 
   useEffect(() => {
     (async () => {
-      const res: any = await classStudents(selectedClass.id);
-      setStudents(res);
+      try {
+        const res: any = await classStudents(selectedClass.id);
+        console.log(res);
+        setStudents(res);
+      } catch (err: any) {
+        console.error("ERROR: ", err);
+        console.error("PB ERROR: ", err.response);
+      }
     })();
   }, [selectedClass]);
 

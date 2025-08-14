@@ -33,9 +33,12 @@ export const fetchStudents = async (selectedClass: string) => {
 export const classStudents = async (classId: string) => {
   const schoolId = pb.authStore.record?.school;
   const academicYear = localStorage.getItem("academicYear");
+
+  console.log(classId);
+
   const res = await pb.collection("students").getFullList({
     expand: "Class",
-    filter: `school = "${schoolId}" && academicYear="${academicYear}" && isDeleted = false && Class.id="${classId}"`,
+    filter: `school = "${schoolId}" && academicYear="${academicYear}" && isDeleted = false && Class="${classId}"`,
   });
   return res;
 };
@@ -51,7 +54,9 @@ export const createStudent = async ({
   const classId = await pb
     .collection("classes")
     .getFirstListItem(
-      `name="${Class.split(" ")[0]}" && combination="${
+      `school = "${schoolId}" && name="${
+        Class.split(" ")[0]
+      }" && combination="${
         Class.split(" ")[1]
       }" && academicYear="${academicYear}"`
     );

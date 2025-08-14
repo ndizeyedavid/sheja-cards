@@ -18,6 +18,7 @@ export const signup = async (data: any) => {
       secondary: data.secondaryColor,
       accent: data.accentColor,
     },
+    logo: data.schoolLogo,
   };
 
   const createSchool = await pb.collection("school").create(schoolData);
@@ -34,16 +35,6 @@ export const signup = async (data: any) => {
     school: createSchool.id,
   };
   const createStaff = await pb.collection("staff").create(headmasterData);
-
-  // Log the school creation
-  await createLog({
-    action: "SCHOOL_CREATED",
-    description: `School "${data.schoolName}" was created with headmaster ${data.fname} ${data.lname}`,
-    entityType: "school",
-    entityId: createSchool.id,
-    metadata: { schoolName: data.schoolName, headmasterEmail: data.email },
-  });
-
   return createStaff;
 };
 
