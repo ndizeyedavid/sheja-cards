@@ -1,4 +1,5 @@
 import pb from "@/lib/pb";
+import { createLog } from "./logs.service";
 
 export const fetchSchool = async () => {
   const schoolId = pb.authStore.record?.school;
@@ -28,6 +29,16 @@ export const updateSchool = async (data: {
   }
 
   const res = await pb.collection("school").update(schoolId, data);
+
+  // Log the school update
+  await createLog({
+    action: "SCHOOL_UPDATED",
+    description: `School information was updated`,
+    entityType: "school",
+    entityId: schoolId,
+    metadata: { updatedFields: Object.keys(data) },
+  });
+
   return res;
 };
 
@@ -41,6 +52,16 @@ export const updateSchoolLogo = async (file: File) => {
   formData.append("logo", file);
 
   const res = await pb.collection("school").update(schoolId, formData);
+
+  // Log the logo update
+  await createLog({
+    action: "SCHOOL_LOGO_UPDATED",
+    description: `School logo was updated`,
+    entityType: "school",
+    entityId: schoolId,
+    metadata: { fileName: file.name, fileSize: file.size },
+  });
+
   return res;
 };
 
@@ -57,6 +78,16 @@ export const updateSchoolColors = async (colors: {
   const res = await pb.collection("school").update(schoolId, {
     colorPalette: colors,
   });
+
+  // Log the colors update
+  await createLog({
+    action: "SCHOOL_COLORS_UPDATED",
+    description: `School colors were updated`,
+    entityType: "school",
+    entityId: schoolId,
+    metadata: { colors },
+  });
+
   return res;
 };
 

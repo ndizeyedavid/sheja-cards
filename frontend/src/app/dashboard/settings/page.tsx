@@ -86,7 +86,7 @@ export default function page() {
         setValue("primaryColor", data.colorPalette?.primary || "#FFFFFF");
         setValue("secondaryColor", data.colorPalette?.secondary || "#FFFFFF");
         setValue("accentColor", data.colorPalette?.accent || "#FFFFFF");
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error loading school data:", error.response);
         toast.error("Failed to load school data");
       } finally {

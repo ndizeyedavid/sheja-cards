@@ -1,71 +1,141 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-  IconBell,
-  IconCheck,
-  IconStar,
-  IconTrash,
+  IconActivity,
   IconUserCircle,
-  IconAlertCircle,
+  IconUsers,
+  IconSchool,
+  IconSettings,
+  IconFileText,
+  IconTrash,
+  IconRefresh,
+  IconFilter,
 } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { fetchLogs } from "@/services/logs.service";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
-// Mock notifications data
-const notifications = [
-  {
-    id: 1,
-    title: "New Student Registration",
-    message: "A new student has registered and needs approval.",
-    time: "2 hours ago",
-    type: "system",
-    isRead: false,
-    isImportant: true,
-    icon: IconUserCircle,
-  },
-  {
-    id: 2,
-    title: "System Maintenance",
-    message: "Scheduled maintenance will occur tonight at 2 AM.",
-    time: "5 hours ago",
-    type: "alert",
-    isRead: true,
-    isImportant: true,
-    icon: IconAlertCircle,
-  },
-  // Add more notifications...
-];
+// Action type icons mapping
+const actionIcons: { [key: string]: any } = {
+  USER_LOGIN: IconUserCircle,
+  USER_LOGOUT: IconUserCircle,
+  STAFF_CREATED: IconUsers,
+  STAFF_UPDATED: IconUsers,
+  STAFF_DELETED: IconUsers,
+  STUDENT_CREATED: IconUsers,
+  STUDENT_UPDATED: IconUsers,
+  STUDENT_DELETED: IconUsers,
+  CLASS_CREATED: IconSchool,
+  CLASS_UPDATED: IconSchool,
+  CLASS_DELETED: IconSchool,
+  SCHOOL_CREATED: IconSchool,
+  SCHOOL_UPDATED: IconSettings,
+  SCHOOL_LOGO_UPDATED: IconSettings,
+  SCHOOL_COLORS_UPDATED: IconSettings,
+  PROFILE_UPDATED: IconUserCircle,
+  PASSWORD_CHANGED: IconUserCircle,
+  AVATAR_UPDATED: IconUserCircle,
+  default: IconActivity,
+};
 
-export default function NotificationsPage() {
+// Action type colors mapping
+const actionColors: { [key: string]: string } = {
+  USER_LOGIN: "text-green-600",
+  USER_LOGOUT: "text-blue-600",
+  STAFF_CREATED: "text-emerald-600",
+  STAFF_UPDATED: "text-amber-600",
+  STAFF_DELETED: "text-red-600",
+  STUDENT_CREATED: "text-emerald-600",
+  STUDENT_UPDATED: "text-amber-600",
+  STUDENT_DELETED: "text-red-600",
+  CLASS_CREATED: "text-emerald-600",
+  CLASS_UPDATED: "text-amber-600",
+  CLASS_DELETED: "text-red-600",
+  SCHOOL_CREATED: "text-emerald-600",
+  SCHOOL_UPDATED: "text-amber-600",
+  SCHOOL_LOGO_UPDATED: "text-amber-600",
+  SCHOOL_COLORS_UPDATED: "text-amber-600",
+  PROFILE_UPDATED: "text-amber-600",
+  PASSWORD_CHANGED: "text-amber-600",
+  AVATAR_UPDATED: "text-amber-600",
+  default: "text-gray-600",
+};
+
+export default function ActivityLogsPage() {
   const [activeTab, setActiveTab] = useState("all");
-  const [notificationsList, setNotificationsList] = useState(notifications);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredNotifications = notificationsList.filter((notification) => {
-    if (activeTab === "unread") return !notification.isRead;
-    if (activeTab === "important") return notification.isImportant;
-    return true;
+  useEffect(() => {
+    const loadLogs = async () => {
+      try {
+        setIsLoading(true);
+        const filters: any = {};
+
+        if (activeTab !== "all") {
+          filters.entityType = activeTab;
+        }
+
+        const response = await fetchLogs({
+          ...filters,
+          page: currentPage,
+          limit: 50,
+        });
+        setLogs(response.items || []);
+      } catch (error) {
+        console.error("Error loading logs:", error);
+        toast.error("Failed to load activity logs");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadLogs();
+  }, [activeTab, currentPage]);
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
+    if (diffInHours < 1) {
+      return "Just now";
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+    }
+  };
+
+  const getActionIcon = (action: string) => {
+    return actionIcons[action] || actionIcons.default;
+  };
+
+  const getActionColor = (action: string) => {
+    return actionColors[action] || actionColors.default;
+  };
+
+  const filteredLogs = logs.filter((log) => {
+    if (activeTab === "all") return true;
+    return log.entityType === activeTab;
   });
 
-  const markAsRead = (id: number) => {
-    setNotificationsList(
-      notificationsList.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
+  const getEntityTypeCount = (entityType: string) => {
+    return logs.filter((log) => log.entityType === entityType).length;
   };
 
-  const toggleImportant = (id: number) => {
-    setNotificationsList(
-      notificationsList.map((n) =>
-        n.id === id ? { ...n, isImportant: !n.isImportant } : n
-      )
-    );
-  };
-
-  const deleteNotification = (id: number) => {
-    setNotificationsList(notificationsList.filter((n) => n.id !== id));
+  const getAllCount = () => {
+    return logs.length;
   };
 
   return (
@@ -75,19 +145,21 @@ export default function NotificationsPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <IconBell className="h-5 w-5" />
-                Recent updates
+                <IconActivity className="h-5 w-5" />
+                Activity Logs
               </CardTitle>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  setNotificationsList(
-                    notificationsList.map((n) => ({ ...n, isRead: true }))
-                  )
-                }
+                onClick={() => window.location.reload()}
+                disabled={isLoading}
               >
-                Mark all as read
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <IconRefresh className="h-4 w-4" />
+                )}
+                <span className="ml-2">Refresh</span>
               </Button>
             </div>
           </CardHeader>
@@ -97,94 +169,100 @@ export default function NotificationsPage() {
                 <TabsTrigger value="all" onClick={() => setActiveTab("all")}>
                   All
                   <Badge variant="secondary" className="ml-2">
-                    {notificationsList.length}
+                    {getAllCount()}
                   </Badge>
                 </TabsTrigger>
                 <TabsTrigger
-                  value="unread"
-                  onClick={() => setActiveTab("unread")}
+                  value="staff"
+                  onClick={() => setActiveTab("staff")}
                 >
-                  Unread
+                  Staff
                   <Badge variant="secondary" className="ml-2">
-                    {notificationsList.filter((n) => !n.isRead).length}
+                    {getEntityTypeCount("staff")}
                   </Badge>
                 </TabsTrigger>
                 <TabsTrigger
-                  value="important"
-                  onClick={() => setActiveTab("important")}
+                  value="student"
+                  onClick={() => setActiveTab("student")}
                 >
-                  Important
+                  Students
                   <Badge variant="secondary" className="ml-2">
-                    {notificationsList.filter((n) => n.isImportant).length}
+                    {getEntityTypeCount("student")}
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="class"
+                  onClick={() => setActiveTab("class")}
+                >
+                  Classes
+                  <Badge variant="secondary" className="ml-2">
+                    {getEntityTypeCount("class")}
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="school"
+                  onClick={() => setActiveTab("school")}
+                >
+                  School
+                  <Badge variant="secondary" className="ml-2">
+                    {getEntityTypeCount("school")}
                   </Badge>
                 </TabsTrigger>
               </TabsList>
 
               <div className="space-y-4">
-                {filteredNotifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={cn(
-                      "flex items-start gap-4 rounded-lg border p-4",
-                      !notification.isRead && "bg-muted/50"
-                    )}
-                  >
-                    <notification.icon className="h-5 w-5 mt-1 text-muted-foreground" />
-                    <div className="flex-1 space-y-1">
-                      <p className="font-medium leading-none">
-                        {notification.title}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {notification.time}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      {!notification.isRead && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => markAsRead(notification.id)}
-                        >
-                          <IconCheck className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => toggleImportant(notification.id)}
-                      >
-                        <IconStar
-                          className={cn(
-                            "h-4 w-4",
-                            notification.isImportant &&
-                              "fill-yellow-400 text-yellow-400"
-                          )}
-                        />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deleteNotification(notification.id)}
-                      >
-                        <IconTrash className="h-4 w-4" />
-                      </Button>
-                    </div>
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span className="ml-2">Loading activity logs...</span>
                   </div>
-                ))}
+                ) : (
+                  <>
+                    {filteredLogs.map((log) => {
+                      const IconComponent = getActionIcon(log.action);
+                      const actionColor = getActionColor(log.action);
 
-                {filteredNotifications.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <IconBell className="h-12 w-12 text-muted-foreground/50" />
-                    <h3 className="mt-4 text-lg font-semibold">
-                      No notifications
-                    </h3>
-                    <p className="text-muted-foreground">
-                      You're all caught up! Check back later for new updates.
-                    </p>
-                  </div>
+                      return (
+                        <div
+                          key={log.id}
+                          className="flex items-start gap-4 rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                        >
+                          <IconComponent
+                            className={cn("h-5 w-5 mt-1", actionColor)}
+                          />
+                          <div className="flex-1 space-y-1">
+                            <p className="font-medium leading-none">
+                              {log.description}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Action: {log.action.replace(/_/g, " ")}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatTimestamp(log.timestamp)}
+                            </p>
+                            {log.expand?.userId && (
+                              <p className="text-xs text-muted-foreground">
+                                By: {log.expand.userId.name}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {filteredLogs.length === 0 && (
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <IconActivity className="h-12 w-12 text-muted-foreground/50" />
+                        <h3 className="mt-4 text-lg font-semibold">
+                          No activity logs
+                        </h3>
+                        <p className="text-muted-foreground">
+                          No activity has been recorded yet. Actions will appear
+                          here as they occur.
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </Tabs>
