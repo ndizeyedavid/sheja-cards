@@ -51,11 +51,11 @@ const data = {
       url: "/dashboard/staff",
       icon: IconUserUp,
     },
-    {
-      title: "Templates",
-      url: "/dashboard/templates",
-      icon: IconCertificate,
-    },
+    // {
+    //   title: "Templates",
+    //   url: "/dashboard/templates",
+    //   icon: IconCertificate,
+    // },
     {
       title: "Card Generator",
       url: "/dashboard/card-generator",

@@ -10,7 +10,7 @@ export default function page() {
       <SectionCards />
 
       {/* Search bar for a student */}
-      <SearchStudent />
+      {/* <SearchStudent /> */}
 
       {/* <div className="px-4 lg:px-6"><ChartAreaInteractive /></div> */}
       <div className="px-4 lg:px-6">
