@@ -71,10 +71,13 @@ export default function CardGeneratorPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Student Card Generator</CardTitle>
             <div className={`flex gap-2 ${!selectedClass?.id && "hidden"}`}>
-              <Button variant="outline" onClick={handleExportPDF}>
-                <IconPrinter className="mr-2 h-4 w-4" />
-                Print Selected
-              </Button>
+              <Link href={"/print/single/" + selectedStudent?.id}>
+                <Button variant="outline" onClick={handleExportPDF}>
+                  <IconPrinter className="mr-2 h-4 w-4" />
+                  Print Selected
+                </Button>
+              </Link>
+
               <Link href={"/print/" + selectedClass?.id}>
                 <Button onClick={handleExportPDF}>
                   <IconDownload className="mr-2 h-4 w-4" />
@@ -91,30 +94,6 @@ export default function CardGeneratorPage() {
                     selectedClass={selectedClass}
                     setSelectedClass={setSelectedClass}
                   />
-
-                  {/* <Select
-                                        value={selectedTemplate.id}
-                                        onValueChange={(id) =>
-                                            setSelectedTemplate(
-                                                cardTemplates.find((t) => t.id === id) ||
-                                                    cardTemplates[0]
-                                            )
-                                        }
-                                    >
-                                        <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder="Select Template" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {cardTemplates.map((template) => (
-                                                <SelectItem
-                                                    key={template.id}
-                                                    value={template.id}
-                                                >
-                                                    {template.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select> */}
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
