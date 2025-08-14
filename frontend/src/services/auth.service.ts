@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import pb from "@/lib/pb";
+import { createLog } from "./logs.service";
 
 interface Ilogin {
   email: string;
@@ -34,6 +35,15 @@ export const signup = async (data: any) => {
   };
   const createStaff = await pb.collection("staff").create(headmasterData);
 
+  // Log the school creation
+  await createLog({
+    action: "SCHOOL_CREATED",
+    description: `School "${data.schoolName}" was created with headmaster ${data.fname} ${data.lname}`,
+    entityType: "school",
+    entityId: createSchool.id,
+    metadata: { schoolName: data.schoolName, headmasterEmail: data.email },
+  });
+
   return createStaff;
 };
 
@@ -43,6 +53,15 @@ export const signin = async (data: Ilogin) => {
     .authWithPassword(data.email, data.password, {
       expand: "school",
     });
+
+  // Log the login
+  await createLog({
+    action: "USER_LOGIN",
+    description: `User ${data.email} logged in successfully`,
+    entityType: "staff",
+    entityId: response.record?.id,
+    metadata: { email: data.email },
+  });
 
   return response;
 };
