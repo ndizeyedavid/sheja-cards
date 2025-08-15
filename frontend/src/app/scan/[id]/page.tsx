@@ -105,7 +105,9 @@ export default function StudentDetails() {
             <AcademicYearSelector disabled={true} />
           </div>
         </div>
-        <Button className="mr-5">Login</Button>
+        <Link href={"/scan/login?student=" + id}>
+          <Button className="mr-5">Login</Button>
+        </Link>
       </header>
       <div className="p-4">
         <div className="mb-4">
