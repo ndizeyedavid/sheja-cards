@@ -187,7 +187,14 @@ export function AddStudentModal({
                 <FormItem>
                   <FormLabel>Registration Number (Optional)</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      defaultValue={
+                        selectedClass.split(" ").join("") +
+                        "-" +
+                        Math.floor(Math.random() * 1000)
+                      }
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
