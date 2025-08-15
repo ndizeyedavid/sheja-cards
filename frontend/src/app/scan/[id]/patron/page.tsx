@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import pb from "@/lib/pb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,7 @@ export default function PatronPage() {
   const [error, setError] = useState<string | null>(null);
   const [disciplineMarks, setDisciplineMarks] = useState<DisciplineMark[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
-
+  const router = useRouter();
   // Form states
   const [newMark, setNewMark] = useState({
     term: 1,
@@ -136,9 +136,9 @@ export default function PatronPage() {
       }
     }
 
+    if (!pb.authStore.record) return router.replace(`/scan/${id}`);
     fetchDetails();
   }, [id]);
-
   const handleMarkSubmit = async () => {
     try {
       if (!student) return;
@@ -192,6 +192,13 @@ export default function PatronPage() {
     return <div>Error: {error || "Failed to load details"}</div>;
   }
 
+  // mi🤗 auth logout logic, lame isn't it😂
+  const handleLogout = () => {
+    if (!confirm("Are you sure you want to logout?")) return;
+    pb.authStore.clear();
+    router.push(`/scan/${id}`);
+  };
+
   return (
     <>
       <header
@@ -220,11 +227,9 @@ export default function PatronPage() {
             <AcademicYearSelector disabled={true} />
           </div>
         </div>
-        <Link href={`/scan/${id}`}>
-          <Button variant="outline" className="mr-5">
-            Back to Student
-          </Button>
-        </Link>
+        <Button variant="destructive" onClick={handleLogout} className="mr-5">
+          Logout
+        </Button>
       </header>
       <div className="p-4">
         <h1 className="text-2xl font-bold mb-4">Patron Dashboard</h1>

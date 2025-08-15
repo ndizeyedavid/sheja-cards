@@ -124,6 +124,7 @@ export default function BursarPage() {
       }
     }
 
+    if (!pb.authStore.record) return router.replace(`/scan/${id}`);
     fetchDetails();
   }, [id]);
 
@@ -257,6 +258,13 @@ export default function BursarPage() {
     }
   };
 
+  // mi🤗 auth logout logic, lame isn't it😂
+  const handleLogout = () => {
+    if (!confirm("Are you sure you want to logout?")) return;
+    pb.authStore.clear();
+    router.push(`/scan/${id}`);
+  };
+
   return (
     <>
       <header
@@ -285,11 +293,9 @@ export default function BursarPage() {
             <AcademicYearSelector disabled={true} />
           </div>
         </div>
-        <Link href={`/scan/${id}`}>
-          <Button variant="outline" className="mr-5">
-            Back to Student
-          </Button>
-        </Link>
+        <Button variant="destructive" onClick={handleLogout} className="mr-5">
+          Logout
+        </Button>
       </header>
       <div className="p-4">
         <div className="mb-4">
