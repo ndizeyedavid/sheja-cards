@@ -21,7 +21,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Student = {
   id: string;
@@ -56,8 +63,13 @@ export default function StudentDetails() {
   const [school, setSchool] = useState<School | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [feeStatus, setFeeStatus] = useState<{ term: number; status: string; amount: number }[]>([]);
+  const [feeStatus, setFeeStatus] = useState<
+    { term: number; status: string; amount: number }[]
+  >([]);
   const [feePayments, setFeePayments] = useState<any[]>([]);
+  const [disciplineMarks, setDisciplineMarks] = useState<any[]>([]);
+  const [permissions, setPermissions] = useState<any[]>([]);
+
 
   useEffect(() => {
     async function fetchDetails() {
@@ -83,6 +95,20 @@ export default function StudentDetails() {
           studentRecord.expand.Class.academicYear
         );
         setFeePayments(payments);
+
+        // Fetch discipline marks
+        const marks = await pb.collection("discipline_marks").getFullList({
+          filter: `student = "${id}" && academicYear = "${studentRecord.expand.Class.academicYear}"`,
+          sort: "-created",
+        });
+        setDisciplineMarks(marks);
+
+        // Fetch permissions
+        const perms = await pb.collection("permissions").getFullList({
+          filter: `student = "${id}" && academicYear = "${studentRecord.expand.Class.academicYear}"`,
+          sort: "-created",
+        });
+        setPermissions(perms);
       } catch (err: any) {
         console.error("ERROR: ", err);
         console.error("PB ERROR: ", err.response);
@@ -224,20 +250,21 @@ export default function StudentDetails() {
               <div>
                 <h3 className="font-semibold mb-2">Discipline Marks</h3>
                 <div className="grid grid-cols-3 gap-4">
-                  {[1, 2, 3].map((term) => (
-                    <div
-                      key={term}
-                      className="text-center p-4 border rounded-lg"
-                    >
-                      <h4 className="font-medium mb-2">Term {term}</h4>
-                      <p className="text-2xl font-bold text-primary">
-                        {90 + term}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Out of 100
-                      </p>
-                    </div>
-                  ))}
+                  {[1, 2, 3].map((term) => {
+                    const termMark = disciplineMarks.find(mark => mark.term === term);
+                    return (
+                      <div
+                        key={term}
+                        className="text-center p-4 border rounded-lg"
+                      >
+                        <h4 className="font-medium mb-2">Term {term}</h4>
+                        <p className="text-2xl font-bold text-primary">
+                          {termMark ? termMark.marks : "-"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">Out of 40</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               <Separator orientation="horizontal" className="my-5" />
@@ -250,8 +277,17 @@ export default function StudentDetails() {
                       <DialogTrigger asChild>
                         <div className="text-center p-4 border rounded-lg cursor-pointer hover:border-primary transition-colors">
                           <h4 className="font-medium mb-2">Term {term.term}</h4>
-                          <p className={`text-2xl font-bold ${term.status === "paid" ? "text-green-600" : term.status === "partial" ? "text-yellow-600" : "text-red-600"}`}>
-                            {term.status.charAt(0).toUpperCase() + term.status.slice(1)}
+                          <p
+                            className={`text-2xl font-bold ${
+                              term.status === "paid"
+                                ? "text-green-600"
+                                : term.status === "partial"
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {term.status.charAt(0).toUpperCase() +
+                              term.status.slice(1)}
                           </p>
                           <p className="text-sm text-muted-foreground">
                             {term.amount.toLocaleString()} RWF
@@ -260,9 +296,12 @@ export default function StudentDetails() {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Term {term.term} Payment History</DialogTitle>
+                          <DialogTitle>
+                            Term {term.term} Payment History
+                          </DialogTitle>
                           <DialogDescription>
-                            Payment records for {student?.expand.Class.academicYear}
+                            Payment records for{" "}
+                            {student?.expand.Class.academicYear}
                           </DialogDescription>
                         </DialogHeader>
                         <Table>
@@ -281,20 +320,31 @@ export default function StudentDetails() {
                               .map((payment) => (
                                 <TableRow key={payment.id}>
                                   <TableCell>
-                                    {new Date(payment.paymentDate).toLocaleDateString()}
+                                    {new Date(
+                                      payment.paymentDate
+                                    ).toLocaleDateString()}
                                   </TableCell>
-                                  <TableCell>{payment.amount.toLocaleString()} RWF</TableCell>
+                                  <TableCell>
+                                    {payment.amount.toLocaleString()} RWF
+                                  </TableCell>
                                   <TableCell>{payment.receiptNumber}</TableCell>
                                   <TableCell>
-                                    {payment.paymentMethod.charAt(0).toUpperCase() +
+                                    {payment.paymentMethod
+                                      .charAt(0)
+                                      .toUpperCase() +
                                       payment.paymentMethod.slice(1)}
                                   </TableCell>
                                   <TableCell>{payment.notes}</TableCell>
                                 </TableRow>
                               ))}
-                            {!feePayments.some((payment) => payment.term === term.term) && (
+                            {!feePayments.some(
+                              (payment) => payment.term === term.term
+                            ) && (
                               <TableRow>
-                                <TableCell colSpan={5} className="text-center py-4">
+                                <TableCell
+                                  colSpan={5}
+                                  className="text-center py-4"
+                                >
                                   No payment records found
                                 </TableCell>
                               </TableRow>
@@ -311,24 +361,8 @@ export default function StudentDetails() {
               <div>
                 <h3 className="font-semibold mb-2">Permissions History</h3>
                 <div className="space-y-4">
-                  {[
-                    {
-                      reason: "Buy school materials",
-                      timeOut: "2024-01-15T09:30:00",
-                      timeIn: "2024-01-15T11:45:00",
-                    },
-                    {
-                      reason: "Medical appointment",
-                      timeOut: "2024-02-02T14:00:00",
-                      timeIn: "2024-02-02T16:30:00",
-                    },
-                    {
-                      reason: "Family emergency",
-                      timeOut: "2024-02-20T10:15:00",
-                      timeIn: "2024-02-20T13:00:00",
-                    },
-                  ].map((permission, index) => (
-                    <div key={index} className="p-4 border rounded-lg">
+                  {permissions.map((permission) => (
+                    <div key={permission.id} className="p-4 border rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
                           <h4 className="font-medium">{permission.reason}</h4>
@@ -353,6 +387,11 @@ export default function StudentDetails() {
                       </div>
                     </div>
                   ))}
+                  {permissions.length === 0 && (
+                    <div className="text-center text-muted-foreground py-4">
+                      No permissions recorded
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
