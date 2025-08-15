@@ -113,7 +113,7 @@ export function NavUser({
               <Link href="/dashboard/notifications">
                 <DropdownMenuItem>
                   <IconNotification />
-                  Notifications
+                  Logs
                 </DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>
