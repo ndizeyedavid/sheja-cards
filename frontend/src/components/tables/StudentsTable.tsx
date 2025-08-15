@@ -45,6 +45,8 @@ import { IconDownload } from "@tabler/icons-react";
 import { generateTemplate } from "./excel/Template";
 import { handleTemplate } from "./excel/UploadTemplate";
 import pb from "@/lib/pb";
+import { Image } from "lucide-react";
+import { UploadImagesModal } from "../students/UploadImagesModal";
 
 interface StudentsTableProps {
     students: Students[];
@@ -97,6 +99,8 @@ export default function StudentsTable({
         }
     };
 
+    const openImageUploader = async (selectedClass: string) => {};
+
     return (
         <>
             {!isFiltered ? (
@@ -142,19 +146,30 @@ export default function StudentsTable({
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
+                                        <DropdownMenuItem asChild>
+                                            <UploadImagesModal
+                                                selectedClass={selectedClass}
+                                                onAddStudents={(newStudents) => {
+                                                    setStudents((prev: any) => [
+                                                        ...prev,
+                                                        ...newStudents,
+                                                    ]);
+                                                }}
+                                            />
+                                        </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() =>
                                                 generateTemplate(selectedClass)
                                             }
                                         >
                                             <IconDownload className="mr-2 h-4 w-4" />
-                                            Download Template
+                                            Download Excel Template
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() => handleTemplate(selectedClass)}
                                         >
                                             <IconUpload className="mr-2 h-4 w-4" />
-                                            Upload Students
+                                            Upload Students From Excel
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
