@@ -12,6 +12,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AcademicYearSelector } from "@/components/AcademicYearSelector";
 import { IconInnerShadowTop } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { schoolFeesService } from "@/services/schoolFees.service";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type Student = {
   id: string;
@@ -46,6 +56,8 @@ export default function StudentDetails() {
   const [school, setSchool] = useState<School | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [feeStatus, setFeeStatus] = useState<{ term: number; status: string; amount: number }[]>([]);
+  const [feePayments, setFeePayments] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchDetails() {
@@ -57,6 +69,20 @@ export default function StudentDetails() {
           });
         setStudent(studentRecord as Student);
         setSchool(studentRecord.expand.school as School);
+
+        // Fetch fee status
+        const status = await schoolFeesService.getStudentFeeStatus(
+          id as string,
+          studentRecord.expand.Class.academicYear
+        );
+        setFeeStatus(status);
+
+        // Fetch fee payments
+        const payments = await schoolFeesService.getStudentFees(
+          id as string,
+          studentRecord.expand.Class.academicYear
+        );
+        setFeePayments(payments);
       } catch (err: any) {
         console.error("ERROR: ", err);
         console.error("PB ERROR: ", err.response);
@@ -105,9 +131,31 @@ export default function StudentDetails() {
             <AcademicYearSelector disabled={true} />
           </div>
         </div>
-        <Link href={"/scan/login?student=" + id}>
-          <Button className="mr-5">Login</Button>
-        </Link>
+        {!pb.authStore.record ? (
+          <Link href={"/scan/login?student=" + id}>
+            <Button className="mr-5">Login</Button>
+          </Link>
+        ) : (
+          <Link
+            href={`/scan/${id}/${pb.authStore.record.role.toLowerCase()}`}
+            className="flex items-center gap-2 hover:bg-gray-400/10 p-2 mr-4 rounded-lg cursor-default"
+          >
+            <div className="size-[45px] bg-gray-900/50 flex items-center justify-center rounded-full">
+              <span className=" font-bold text-lg">
+                {pb.authStore.record.role.split("")[0]}
+              </span>
+            </div>
+            <div className="-space-y-1">
+              <h3 className="opacity-90">
+                {pb.authStore.record.name.split(" ")[1]} (
+                <b>{pb.authStore.record.role}</b>)
+              </h3>
+              <h4 className="text-sm opacity-70">
+                {pb.authStore.record.email}
+              </h4>
+            </div>
+          </Link>
+        )}
       </header>
       <div className="p-4">
         <div className="mb-4">
@@ -197,17 +245,64 @@ export default function StudentDetails() {
               <div>
                 <h3 className="font-semibold mb-2">School Fees Status</h3>
                 <div className="grid grid-cols-3 gap-4">
-                  {[1, 2, 3].map((term) => (
-                    <div
-                      key={term}
-                      className="text-center p-4 border rounded-lg"
-                    >
-                      <h4 className="font-medium mb-2">Term {term}</h4>
-                      <p className="text-2xl font-bold text-green-600">Paid</p>
-                      <p className="text-sm text-muted-foreground">
-                        200,000 RWF
-                      </p>
-                    </div>
+                  {feeStatus.map((term) => (
+                    <Dialog key={term.term}>
+                      <DialogTrigger asChild>
+                        <div className="text-center p-4 border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                          <h4 className="font-medium mb-2">Term {term.term}</h4>
+                          <p className={`text-2xl font-bold ${term.status === "paid" ? "text-green-600" : term.status === "partial" ? "text-yellow-600" : "text-red-600"}`}>
+                            {term.status.charAt(0).toUpperCase() + term.status.slice(1)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {term.amount.toLocaleString()} RWF
+                          </p>
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Term {term.term} Payment History</DialogTitle>
+                          <DialogDescription>
+                            Payment records for {student?.expand.Class.academicYear}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Amount</TableHead>
+                              <TableHead>Receipt #</TableHead>
+                              <TableHead>Method</TableHead>
+                              <TableHead>Notes</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {feePayments
+                              .filter((payment) => payment.term === term.term)
+                              .map((payment) => (
+                                <TableRow key={payment.id}>
+                                  <TableCell>
+                                    {new Date(payment.paymentDate).toLocaleDateString()}
+                                  </TableCell>
+                                  <TableCell>{payment.amount.toLocaleString()} RWF</TableCell>
+                                  <TableCell>{payment.receiptNumber}</TableCell>
+                                  <TableCell>
+                                    {payment.paymentMethod.charAt(0).toUpperCase() +
+                                      payment.paymentMethod.slice(1)}
+                                  </TableCell>
+                                  <TableCell>{payment.notes}</TableCell>
+                                </TableRow>
+                              ))}
+                            {!feePayments.some((payment) => payment.term === term.term) && (
+                              <TableRow>
+                                <TableCell colSpan={5} className="text-center py-4">
+                                  No payment records found
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </DialogContent>
+                    </Dialog>
                   ))}
                 </div>
               </div>
