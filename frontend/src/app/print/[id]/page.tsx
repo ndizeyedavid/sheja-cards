@@ -247,7 +247,7 @@ export default function page() {
                     }}
                   >
                     <QRCodeSVG
-                      value={"http:localhost:3000/scan/" + student.id}
+                      value={"http://localhost:3000/scan/" + student.id}
                       size={102 * scale}
                       bgColor="transparent"
                       fgColor="white"
