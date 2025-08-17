@@ -28,6 +28,7 @@ import {
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { signin } from "@/services/auth.service";
+import pb from "@/lib/pb";
 
 const loginSchema = z
   .object({
@@ -42,10 +43,15 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function Page() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isNew, setIsNew] = useState<boolean>(false);
+  const [schoolCount, setSchoolCount] = useState<number>(0);
   const searcParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
+    (async () => {
+      const count = await pb.collection("school").getFullList();
+      setSchoolCount(count.length);
+    })();
     setIsNew(searcParams.get("new") ? true : false);
   }, []);
 
@@ -115,7 +121,7 @@ export default function Page() {
 
             <div className="grid grid-cols-3 gap-4 pt-8">
               <div className="text-center">
-                <div className="text-2xl font-bold">3</div>
+                <div className="text-2xl font-bold">{schoolCount}</div>
                 <div className="text-sm text-white/80">Active Schools</div>
               </div>
               <div className="text-center">
