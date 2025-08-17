@@ -77,7 +77,10 @@ export default function CardGeneratorPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Student Card Generator</CardTitle>
             <div className={`flex gap-2 ${!selectedClass?.id && "hidden"}`}>
-              <Link href={"/print/single/" + selectedStudent?.id}>
+              <Link
+                href={"/print/single/" + selectedStudent?.id}
+                className={`${!selectedStudent?.id && "hidden"}`}
+              >
                 <Button variant="outline" onClick={handleExportPDF}>
                   <IconPrinter className="mr-2 h-4 w-4" />
                   Print Selected

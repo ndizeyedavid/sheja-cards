@@ -100,7 +100,10 @@ export const SectionCards: React.FC = () => {
               Monitor and manage your school's analytics
             </p>
           </div>
-          <Button className="flex items-center gap-2">
+          <Button
+            className="flex items-center gap-2"
+            onClick={() => window.print()}
+          >
             <Download className="w-4 h-4" />
             Export Data
           </Button>
