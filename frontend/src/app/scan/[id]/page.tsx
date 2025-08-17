@@ -38,6 +38,7 @@ type Student = {
   gender: string;
   dateOfBirth: string;
   profileImage: string;
+  school: string;
   expand: {
     Class: {
       name: string;
@@ -69,16 +70,21 @@ export default function StudentDetails() {
   const [feePayments, setFeePayments] = useState<any[]>([]);
   const [disciplineMarks, setDisciplineMarks] = useState<any[]>([]);
   const [permissions, setPermissions] = useState<any[]>([]);
-
+  const [schoolStaff, setSchoolStaff] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchDetails() {
       try {
-        const studentRecord = await pb
+        const studentRecord: Student = await pb
           .collection("students")
           .getOne(id as string, {
             expand: "Class, school",
           });
+        const fetchSchoolStaff = await pb.collection("staff").getFullList({
+          filter: `school = "${studentRecord.school}"`,
+        });
+        console.log(fetchSchoolStaff);
+        setSchoolStaff(fetchSchoolStaff);
         setStudent(studentRecord as Student);
         setSchool(studentRecord.expand.school as School);
 
@@ -251,7 +257,9 @@ export default function StudentDetails() {
                 <h3 className="font-semibold mb-2">Discipline Marks</h3>
                 <div className="grid grid-cols-3 gap-4">
                   {[1, 2, 3].map((term) => {
-                    const termMark = disciplineMarks.find(mark => mark.term === term);
+                    const termMark = disciplineMarks.find(
+                      (mark) => mark.term === term
+                    );
                     return (
                       <div
                         key={term}
@@ -261,7 +269,9 @@ export default function StudentDetails() {
                         <p className="text-2xl font-bold text-primary">
                           {termMark ? termMark.marks : "-"}
                         </p>
-                        <p className="text-sm text-muted-foreground">Out of 40</p>
+                        <p className="text-sm text-muted-foreground">
+                          Out of 40
+                        </p>
                       </div>
                     );
                   })}
@@ -427,38 +437,7 @@ export default function StudentDetails() {
                 <div>
                   <h3 className="font-semibold mb-2">School Staff</h3>
                   <div className="grid gap-2">
-                    {[
-                      {
-                        name: "Jean Bosco",
-                        role: "Headmaster",
-                        phone: "0788550389",
-                        email: "bosco@school.edu",
-                      },
-                      {
-                        name: "Alice Mukamana",
-                        role: "Secretary",
-                        phone: "0788657750",
-                        email: "alice@school.edu",
-                      },
-                      {
-                        name: "Eric Niyonzima",
-                        role: "Director of Studies",
-                        phone: "0788891751",
-                        email: "eric@school.edu",
-                      },
-                      {
-                        name: "Claudine Uwase",
-                        role: "Bursar",
-                        phone: "0782607594",
-                        email: "claudine@school.edu",
-                      },
-                      {
-                        name: "Patrick Mugisha",
-                        role: "Disciplinary",
-                        phone: "0788262838",
-                        email: "patrick@school.edu",
-                      },
-                    ].map((staff, idx) => (
+                    {schoolStaff.map((staff, idx) => (
                       <div
                         key={idx}
                         className="p-4 border rounded-lg flex flex-col md:flex-row md:items-center md:justify-between gap-2"
