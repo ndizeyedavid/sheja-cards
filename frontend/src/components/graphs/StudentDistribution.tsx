@@ -92,7 +92,7 @@ export function StudentDistribution() {
   }, []);
 
   return (
-    <Card className="col-span-4">
+    <Card className="col-span-4 w-full">
       <CardHeader>
         <CardTitle>Student Distribution</CardTitle>
       </CardHeader>

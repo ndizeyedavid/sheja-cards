@@ -191,6 +191,7 @@ export default function Page() {
             </Card>
 
             <div className="flex gap-3">
+              {/* Card Design settings */}
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -300,6 +301,7 @@ export default function Page() {
                 </CardContent>
               </Card>
 
+              {/* Preview card */}
               <Card className="w-[30%]">
                 <div
                   className="bg-white shadow-lg border border-gray-200 mx-auto relative overflow-hidden"

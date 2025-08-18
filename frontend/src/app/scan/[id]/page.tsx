@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/tables/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AcademicYearSelector } from "@/components/AcademicYearSelector";
-import { IconInnerShadowTop } from "@tabler/icons-react";
+import { IconInnerShadowTop, IconLocation } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { schoolFeesService } from "@/services/schoolFees.service";
 import {
@@ -29,6 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { LocationEdit, MapPin } from "lucide-react";
 
 type Student = {
   id: string;
@@ -212,6 +213,7 @@ export default function StudentDetails() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Student Information */}
           <Card className="h-fit">
             <CardHeader>
               <CardTitle>Student Information</CardTitle>
@@ -407,6 +409,7 @@ export default function StudentDetails() {
             </CardContent>
           </Card>
 
+          {/* school info */}
           <Card className="h-fit">
             <CardHeader>
               <CardTitle>School Information</CardTitle>
@@ -422,18 +425,14 @@ export default function StudentDetails() {
                 </Avatar>
                 <div>
                   <h2 className="text-xl font-semibold">{school.name}</h2>
+                  <span className="mt-1 flex items-center gap-1">
+                    <MapPin className="opacity-80" />
+                    {school.address}
+                  </span>
                 </div>
               </div>
 
               <div className="grid gap-4">
-                <div>
-                  <h3 className="font-semibold mb-2">
-                    Location: {school.address}
-                  </h3>
-                  <div className="w-full h-64 bg-gray-900 rounded-2xl shadow">
-                    {"Map will go here"}
-                  </div>
-                </div>
                 <div>
                   <h3 className="font-semibold mb-2">School Staff</h3>
                   <div className="grid gap-2">
@@ -452,7 +451,11 @@ export default function StudentDetails() {
                           <span className="mr-4">
                             <strong>Phone:</strong> {staff.phone}
                           </span>
-                          <span>
+                          <span
+                            style={{
+                              display: staff.role == "HEADMASTER" ? "none" : "",
+                            }}
+                          >
                             <strong>Email:</strong> {staff.email}
                           </span>
                         </div>
