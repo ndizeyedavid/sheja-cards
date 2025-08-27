@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import BetaRibbon from "@/components/ui/beta-ribbon";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -22,15 +23,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} font-sans antialiased`}
-      >
+      <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
+          <BetaRibbon />
           {children}
         </ThemeProvider>
       </body>
