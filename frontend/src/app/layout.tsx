@@ -1,5 +1,6 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import BetaRibbon from "@/components/ui/beta-ribbon";
+import { Analytics } from "@vercel/analytics/next";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -34,6 +35,7 @@ export default function RootLayout({
           {children}
         </ThemeProvider>
       </body>
+      <Analytics />
     </html>
   );
 }
