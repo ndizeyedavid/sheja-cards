@@ -30,9 +30,7 @@ export default function Hero() {
               <span className="bg-primary mr-2 rounded-full px-2 py-0.5 text-xs font-semibold text-secondary">
                 Latest
               </span>
-              <span className="text-muted-foreground">
-                Stable version v0.5.4
-              </span>
+              <span className="text-muted-foreground">Beta version v0.5.4</span>
               <ChevronRight className="text-muted-foreground ml-1 h-4 w-4" />
             </div>
           </motion.div>
