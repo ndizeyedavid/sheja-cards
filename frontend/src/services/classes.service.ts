@@ -1,5 +1,6 @@
 "use client";
 import pb from "@/lib/pb";
+import { Classes } from "@/types/classes.types";
 import { createLog } from "./logs.service";
 import { toast } from "sonner";
 
@@ -30,16 +31,26 @@ export const createClass = async (body: any) => {
     },
   });
 
-  return res;
+  return {
+    id: res.id,
+    name: res.name,
+    combination: res.combination,
+    academicYear: res.academicYear
+  };
 };
 
-export const fetchClasses = async () => {
+export const fetchClasses = async (): Promise<Classes[]> => {
   const schoolId = pb.authStore.record?.school;
   const academicYear = localStorage.getItem("academicYear");
   const res = await pb.collection("classes").getFullList({
     filter: `school = "${schoolId}" && academicYear="${academicYear}" && isDeleted = false`,
   });
-  return res;
+  return res.map(classData => ({
+    id: classData.id,
+    name: classData.name,
+    combination: classData.combination,
+    academicYear: classData.academicYear
+  }));
 };
 
 export const deleteClass = async (id: string) => {
@@ -78,5 +89,10 @@ export const updateClass = async (id: string, body: any) => {
     },
   });
 
-  return updatedData;
+  return {
+    id: updatedData.id,
+    name: updatedData.name,
+    combination: updatedData.combination,
+    academicYear: updatedData.academicYear
+  };
 };

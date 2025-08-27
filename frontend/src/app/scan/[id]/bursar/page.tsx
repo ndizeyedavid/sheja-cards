@@ -45,25 +45,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-type Student = {
-  id: string;
-  name: string;
-  status: string;
-  registrationNumber: string;
-  gender: string;
-  dateOfBirth: string;
-  profileImage: string;
-  expand: {
-    Class: {
-      name: string;
-      combination: string;
-      academicYear: string;
-    };
-    school: School;
-  };
-};
+import { StudentRecord } from "@/types/student.types";
 
-type School = {
+type School = StudentRecord["expand"]["school"];
+
+type SchoolFeeData = {
   id: string;
   name: string;
   logo: string;
@@ -73,10 +59,13 @@ type School = {
 };
 
 export default function BursarPage() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id;
   const router = useRouter();
-  const [student, setStudent] = useState<Student | null>(null);
-  const [school, setSchool] = useState<School | null>(null);
+  const [student, setStudent] = useState<StudentRecord | null>(null);
+  const [school, setSchool] = useState<
+    StudentRecord["expand"]["school"] | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [academicYear, setAcademicYear] = useState<string>("");
@@ -112,8 +101,17 @@ export default function BursarPage() {
           .getOne(id as string, {
             expand: "Class, school",
           });
-        setStudent(studentRecord as Student);
-        setSchool(studentRecord.expand.school as School);
+        if (!studentRecord.expand?.school || !studentRecord.expand?.Class) {
+          throw new Error(
+            "Failed to load student details: Missing required data"
+          );
+        }
+
+        setStudent(studentRecord as unknown as StudentRecord);
+        setSchool(
+          studentRecord.expand
+            .school as unknown as StudentRecord["expand"]["school"]
+        );
         setAcademicYear(studentRecord.expand.Class.academicYear);
       } catch (err: any) {
         console.error("ERROR: ", err);

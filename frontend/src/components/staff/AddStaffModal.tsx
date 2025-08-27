@@ -31,7 +31,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { IconPlus } from "@tabler/icons-react";
-import { Staff } from "@/types/staff";
+import { Staff, StaffRole } from "@/types/staff";
 import { createStaff } from "@/services/staff.service";
 import { toast } from "sonner";
 import { PhoneInput } from "../form-input/PhoneInput";
@@ -39,7 +39,7 @@ import { PhoneInput } from "../form-input/PhoneInput";
 const staffSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.email("Invalid email address"),
-    role: z.enum(["DOS", "BURSAR", "TEACHER", "PATRON"]),
+    role: z.nativeEnum(StaffRole),
     phone: z.string().min(1, "Phone number is required"),
     idNumber: z.string().min(1, "ID number is required"),
 });
@@ -59,7 +59,7 @@ export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
         defaultValues: {
             name: "",
             email: "",
-            role: "TEACHER",
+            role: StaffRole.TEACHER,
             phone: "",
             idNumber: "",
         },
@@ -144,12 +144,11 @@ export function AddStaffModal({ onAddStaff }: AddStaffModalProps) {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="DOS">DOS</SelectItem>
-                                            <SelectItem value="BURSAR">Bursar</SelectItem>
-                                            <SelectItem value="TEACHER">
-                                                Teacher
-                                            </SelectItem>
-                                            <SelectItem value="PATRON">Patron</SelectItem>
+                                            <SelectItem value={StaffRole.DOS}>DOS</SelectItem>
+                                            <SelectItem value={StaffRole.BURSAR}>Bursar</SelectItem>
+                                            <SelectItem value={StaffRole.TEACHER}>Teacher</SelectItem>
+                                            <SelectItem value={StaffRole.PATRON}>Patron</SelectItem>
+                                            <SelectItem value={StaffRole.SECRETARY}>Secretary</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />

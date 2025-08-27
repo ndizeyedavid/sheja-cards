@@ -14,14 +14,14 @@ import { Label } from "@/components/ui/label";
 import { updateClass } from "@/services/classes.service";
 import { IconEdit } from "@tabler/icons-react";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Classes } from "@/types/classes.types";
 
 interface UpdateClassFormProps {
     classData: Classes;
-    setClasses: (classes: Classes[]) => void;
+    setClasses: Dispatch<SetStateAction<Classes[]>>;
 }
 
 export default function UpdateClassForm({ classData, setClasses }: UpdateClassFormProps) {

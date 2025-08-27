@@ -19,7 +19,7 @@ export default function page() {
   const [student, setStudents] = useState<any>([]);
 
   const params = useParams();
-  const studentId: any = params.id;
+  const studentId: any = params?.id;
   const scale = 2;
 
   useEffect(() => {

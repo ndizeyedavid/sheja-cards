@@ -60,7 +60,8 @@ type School = {
 };
 
 export default function StudentDetails() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id;
   const [student, setStudent] = useState<Student | null>(null);
   const [school, setSchool] = useState<School | null>(null);
   const [loading, setLoading] = useState(true);

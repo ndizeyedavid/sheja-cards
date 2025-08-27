@@ -19,8 +19,7 @@ import { classStudents } from "@/services/students.service";
 import pb from "@/lib/pb";
 import Link from "next/link";
 
-// Mock data
-const classes = ["Form 1", "Form 2", "Form 3", "Form 4"];
+import { Classes } from "@/types/classes.types";
 
 const cardTemplates: CardTemplate[] = [
   {
@@ -44,7 +43,7 @@ const cardTemplates: CardTemplate[] = [
 ];
 
 export default function CardGeneratorPage() {
-  const [selectedClass, setSelectedClass] = useState<string>("");
+  const [selectedClass, setSelectedClass] = useState<Classes | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [students, setStudents] = useState([]);
 
@@ -53,16 +52,18 @@ export default function CardGeneratorPage() {
   );
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res: any = await classStudents(selectedClass.id);
-        console.log(res);
-        setStudents(res);
-      } catch (err: any) {
-        console.error("ERROR: ", err);
-        console.error("PB ERROR: ", err.response);
-      }
-    })();
+    if (selectedClass?.id) {
+      (async () => {
+        try {
+          const res: any = await classStudents(selectedClass.id);
+          console.log(res);
+          setStudents(res);
+        } catch (err: any) {
+          console.error("ERROR: ", err);
+          console.error("PB ERROR: ", err.response);
+        }
+      })();
+    }
   }, [selectedClass]);
 
   const handleExportPDF = () => {
@@ -131,7 +132,6 @@ export default function CardGeneratorPage() {
                               {student.name
                                 .split(" ")
                                 .map((n: any) => n[0])
-
                                 .join("")}
                             </AvatarFallback>
                           </Avatar>

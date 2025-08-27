@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, Dispatch, SetStateAction } from "react";
 import { Students } from "@/types/student.types";
 import Loading from "./Loading";
 import { AddStudentModal } from "../students/AddStudentModal";
@@ -53,7 +53,7 @@ interface StudentsTableProps {
   isFiltered: boolean;
   selectedClass: string;
   isLoading: boolean;
-  setStudents: any;
+  setStudents: React.Dispatch<React.SetStateAction<Students[]>>;
 }
 
 export default function StudentsTable({
@@ -77,13 +77,13 @@ export default function StudentsTable({
       )
     : [];
 
-  const handleAddStudent = (newStudent: any) => {
+  const handleAddStudent = (newStudent: Students) => {
     setStudents([...students, newStudent]);
   };
 
-  const handleUpdateStudent = (updatedStudent: any) => {
+  const handleUpdateStudent = (updatedStudent: Students) => {
     setStudents(
-      students.map((student) =>
+      students.map((student: Students) =>
         student.id === updatedStudent.id ? updatedStudent : student
       )
     );
@@ -152,7 +152,7 @@ export default function StudentsTable({
                       <UploadImagesModal
                         selectedClass={selectedClass}
                         onAddStudents={(newStudents) => {
-                          setStudents((prev: any) => [...prev, ...newStudents]);
+                          setStudents((prev: Students[]) => [...prev, ...newStudents]);
                         }}
                       />
                     </DropdownMenuItem>
@@ -198,7 +198,7 @@ export default function StudentsTable({
                     // Loading skeletons
                     <Loading category="default" />
                   ) : (
-                    filteredStudents.map((student: any) => (
+                    filteredStudents.map((student: Students) => (
                       <TableRow key={student.id}>
                         {/* console.log(student) */}
                         <TableCell>{student.registrationNumber}</TableCell>
@@ -207,7 +207,7 @@ export default function StudentsTable({
                             <AvatarImage
                               src={pb.files.getURL(
                                 student,
-                                student.profileImage
+                                student.avatar
                               )}
                               alt={student.name}
                             />
@@ -230,9 +230,8 @@ export default function StudentsTable({
                             : "-"}
                         </TableCell>
                         <TableCell>
-                          {student.expand.Class.name +
-                            " " +
-                            student.expand.Class.combination}
+                          {student.expand?.class?.name}
+                          {student.expand?.class?.combination && ` ${student.expand.class.combination}`}
                         </TableCell>
                         <TableCell>
                           <StatusBadge status={student.status} />

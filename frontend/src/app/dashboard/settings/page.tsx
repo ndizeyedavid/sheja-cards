@@ -37,12 +37,23 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { QRCodeSVG } from "qrcode.react";
 import pb from "@/lib/pb";
 
+interface FormData {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  logo: File[] | null;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+}
+
 export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
   const [schoolData, setSchoolData] = useState<any>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
-  const form = useForm({
+  const form = useForm<FormData>({
     defaultValues: {
       name: "",
       email: "",
@@ -88,7 +99,7 @@ export default function Page() {
     loadSchoolData();
   }, [setValue]);
 
-  const onSubmit = async (formData: any) => {
+  const onSubmit = async (formData: FormData) => {
     try {
       setIsLoading(true);
       await updateSchool({
@@ -217,8 +228,8 @@ export default function Page() {
                               <FileUpload
                                 accept="image/*"
                                 maxSize={5 * 1024 * 1024}
-                                onValueChange={field.onChange}
-                                value={field.value ? [field.value] : []}
+                                onValueChange={(files) => field.onChange(files)}
+                                value={field.value || []}
                               >
                                 <FileUploadDropzone className="min-h-[120px]">
                                   <div className="flex flex-col items-center gap-2">
@@ -234,7 +245,7 @@ export default function Page() {
                                   </FileUploadTrigger>
                                 </FileUploadDropzone>
                                 {field.value &&
-                                  (field.value as File[]).map((file: File) => (
+                                  field.value.map((file: File) => (
                                     <FileUploadItem
                                       key={file.name}
                                       value={file}
@@ -348,67 +359,15 @@ export default function Page() {
                         height: "100vh",
                       }}
                     />
-                    <div className="relative pt-8 pb-6 flex flex-col items-center">
-                      <div
-                        className="rounded-full bg-white p-1 mb-4"
-                        style={{ width: "80px", height: "80px" }}
-                      >
-                        <Avatar className="w-full h-full">
-                          <AvatarImage
-                            src={""}
-                            alt="Student"
-                            className="object-cover"
-                          />
-                          <AvatarFallback>ME</AvatarFallback>
-                        </Avatar>
-                      </div>
-                      <div className="text-center px-2">
-                        <h3 className="font-bold text-white uppercase leading-tight mb-1 text-[13px]">
-                          Student Name
-                        </h3>
-                        <p className="text-white leading-tight text-[11px]">
-                          Class Here
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="px-6 py-2 text-white relative z-10 mt-[-19px]">
-                    <div className="space-y-1 text-[9px]">
-                      {["Reg No", "Gender", "DOB", "Valid Year"].map(
-                        (label, idx) => (
-                          <div key={idx} className="flex items-center">
-                            <span className="w-12">{label}</span>
-                            <span className="w-1">:</span>
-                            <span className="truncate bg-gray-400/70 w-[80px] h-2 rounded" />
-                          </div>
-                        )
-                      )}
-                    </div>
-                    <div className="absolute bottom-4 right-4">
-                      <div
-                        className="shadow-md rounded-md p-1 flex items-center justify-center"
-                        style={{ width: "40px", height: "40px" }}
-                      >
-                        <QRCodeSVG
-                          value="http://localhost:3000/scan/"
-                          size={32}
-                        />
-                      </div>
-                    </div>
                   </div>
                 </div>
               </Card>
             </div>
 
             <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading || isLoadingData}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
-                  </>
-                ) : (
-                  "Save All Changes"
-                )}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
               </Button>
             </div>
           </form>

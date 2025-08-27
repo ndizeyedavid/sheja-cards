@@ -1,4 +1,7 @@
 "use client";
+
+export const dynamic = 'force-dynamic';
+
 import { IconInnerShadowTop } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
@@ -7,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
 import pb from "@/lib/pb";
+
+export const runtime = 'edge';
 import { toast } from "sonner";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -20,7 +25,7 @@ export default function page() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const studentId: any = searchParams.get("student");
+  const studentId: any = searchParams?.get("student");
 
   const loginStaff = async (data: any) => {
     try {

@@ -40,55 +40,38 @@ import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/tables/StatusBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Student = {
-  id: string;
-  name: string;
-  status: string;
-  registrationNumber: string;
-  gender: string;
-  dateOfBirth: string;
-  profileImage: string;
-  expand: {
-    Class: {
-      name: string;
-      combination: string;
-      academicYear: string;
-    };
-    school: School;
-  };
-};
+import { StudentRecord } from "@/types/student.types";
+import Record from "pocketbase";
 
-type School = {
+interface DisciplineMark extends Record {
   id: string;
-  name: string;
-  logo: string;
-  phone: string;
-  email: string;
-  address: string;
-};
-
-type DisciplineMark = {
-  id: string;
+  collectionId: string;
+  collectionName: string;
+  created: string;
+  updated: string;
   term: number;
   marks: number;
   student: string;
   academicYear: string;
-  created: string;
-};
+}
 
-type Permission = {
+interface Permission extends Record {
   id: string;
+  collectionId: string;
+  collectionName: string;
+  created: string;
+  updated: string;
   reason: string;
   timeOut: string;
   timeIn: string;
   student: string;
   academicYear: string;
-  created: string;
-};
+}
 
 export default function PatronPage() {
-  const { id } = useParams();
-  const [student, setStudent] = useState<Student | null>(null);
+  const params = useParams();
+  const id = params?.id;
+  const [student, setStudent] = useState<StudentRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [disciplineMarks, setDisciplineMarks] = useState<DisciplineMark[]>([]);
@@ -113,21 +96,30 @@ export default function PatronPage() {
           .getOne(id as string, {
             expand: "Class, school",
           });
-        setStudent(studentRecord as Student);
+
+        if (!studentRecord.expand?.Class || !studentRecord.expand?.school) {
+          throw new Error(
+            "Failed to load student details: Missing required data"
+          );
+        }
+
+        setStudent(studentRecord as unknown as StudentRecord);
+
+        const academicYear = studentRecord.expand.Class.academicYear;
 
         // Fetch discipline marks
         const marks = await pb.collection("discipline_marks").getFullList({
-          filter: `student = "${id}" && academicYear = "${studentRecord.expand.Class.academicYear}"`,
+          filter: `student = "${id}" && academicYear = "${academicYear}"`,
           sort: "-created",
         });
-        setDisciplineMarks(marks);
+        setDisciplineMarks(marks as unknown as DisciplineMark[]);
 
         // Fetch permissions
         const perms = await pb.collection("permissions").getFullList({
-          filter: `student = "${id}" && academicYear = "${studentRecord.expand.Class.academicYear}"`,
+          filter: `student = "${id}" && academicYear = "${academicYear}"`,
           sort: "-created",
         });
-        setPermissions(perms);
+        setPermissions(perms as unknown as Permission[]);
       } catch (err: any) {
         console.error("ERROR: ", err);
         setError(err.message || "Failed to fetch details");
@@ -154,7 +146,7 @@ export default function PatronPage() {
         filter: `student = "${id}" && academicYear = "${student.expand.Class.academicYear}"`,
         sort: "-created",
       });
-      setDisciplineMarks(marks);
+      setDisciplineMarks(marks as unknown as DisciplineMark[]);
     } catch (err: any) {
       console.error("ERROR: ", err);
       toast.error(err.message || "Failed to add discipline mark");
@@ -177,7 +169,7 @@ export default function PatronPage() {
         filter: `student = "${id}" && academicYear = "${student.expand.Class.academicYear}"`,
         sort: "-created",
       });
-      setPermissions(perms);
+      setPermissions(perms as unknown as Permission[]);
     } catch (err: any) {
       console.error("ERROR: ", err);
       toast.error(err.message || "Failed to add permission");

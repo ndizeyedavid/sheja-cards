@@ -32,7 +32,7 @@ export default function Filtercard({
     const handleFilter = async () => {
         if (selectedClass === "-") return;
 
-        const params = new URLSearchParams(searchParams);
+        const params = new URLSearchParams(searchParams?.toString() || "");
         params.set("class", selectedClass);
         router.replace(`${pathname}?${params.toString()}`);
 

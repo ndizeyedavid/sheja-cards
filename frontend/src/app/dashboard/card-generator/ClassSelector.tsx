@@ -16,25 +16,23 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { fetchClasses } from "@/services/classes.service";
 
-interface IClass {
-    id: string;
-    name: string;
-    combination: string;
-}
+import { Classes } from "@/types/classes.types";
+
+type Class = Classes;
 
 export function ClassSelector({
     selectedClass,
     setSelectedClass,
 }: {
-    selectedClass: string;
-    setSelectedClass: any;
+    selectedClass: Class | null;
+    setSelectedClass: (Class: Class | null) => void;
 }) {
     const [open, setOpen] = React.useState(false);
-    const [classes, setClasses] = React.useState<IClass[]>([]);
+    const [classes, setClasses] = React.useState<Class[]>([]);
 
     React.useEffect(() => {
         (async () => {
-            const res: any = await fetchClasses();
+            const res = await fetchClasses();
             setClasses(res);
         })();
     }, []);

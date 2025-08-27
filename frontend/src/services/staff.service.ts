@@ -1,15 +1,31 @@
 import pb from "@/lib/pb";
 import { createLog } from "./logs.service";
+import { Staff } from "@/types/staff";
+import { RecordModel } from "pocketbase";
 
-export const fetchStaff = async () => {
+export const fetchStaff = async (): Promise<Staff[]> => {
   const schoolId = pb.authStore.record?.school;
   const res = await pb.collection("staff").getFullList({
     filter: `school = "${schoolId}" && isDeleted = false && role!="HEADMASTER"`,
   });
-  return res;
+  return res.map((record: RecordModel) => ({
+    id: record.id,
+    collectionId: record.collectionId,
+    collectionName: record.collectionName,
+    created: record.created,
+    updated: record.updated,
+    name: record.name,
+    email: record.email,
+    role: record.role,
+    phone: record.phone,
+    idNumber: record.idNumber,
+    status: record.status || 'active',
+    school: record.school,
+    avatar: record.avatar
+  }));
 };
 
-export const createStaff = async (data: any) => {
+export const createStaff = async (data: any): Promise<Staff> => {
   const schoolId = pb.authStore.record?.school;
   const tempPassword = Math.random().toString(36).slice(-8);
   const res = await pb.collection("staff").create({
@@ -30,7 +46,21 @@ export const createStaff = async (data: any) => {
     metadata: { staffName: data.name, role: data.role, email: data.email },
   });
 
-  return res;
+  return {
+    id: res.id,
+    collectionId: res.collectionId,
+    collectionName: res.collectionName,
+    created: res.created,
+    updated: res.updated,
+    name: res.name,
+    email: res.email,
+    role: res.role,
+    phone: res.phone,
+    idNumber: res.idNumber,
+    status: res.status || 'active',
+    school: res.school,
+    avatar: res.avatar
+  };
 };
 
 export const updateStaff = async (id: string, data: any) => {
@@ -50,7 +80,21 @@ export const updateStaff = async (id: string, data: any) => {
     metadata: { staffName: data.name, updatedFields: Object.keys(data) },
   });
 
-  return res;
+  return res.map((record: RecordModel) => ({
+    id: record.id,
+    collectionId: record.collectionId,
+    collectionName: record.collectionName,
+    created: record.created,
+    updated: record.updated,
+    name: record.name,
+    email: record.email,
+    role: record.role,
+    phone: record.phone,
+    idNumber: record.idNumber,
+    status: record.status || 'active',
+    school: record.school,
+    avatar: record.avatar
+  }));
 };
 
 export const deleteStaff = async (id: string) => {

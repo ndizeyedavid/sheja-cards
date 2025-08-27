@@ -46,7 +46,7 @@ export const createStudent = async ({
   data,
   Class,
 }: {
-  data: object;
+  data: { name: string; gender: string; dateOfBirth: Date | string; registrationNumber?: string; profileImage?: File; [key: string]: any };
   Class: any;
 }) => {
   const schoolId = pb.authStore.record?.school;

@@ -1,4 +1,7 @@
 "use client";
+
+export const dynamic = 'force-dynamic';
+
 import ClassesTable from "@/components/tables/ClassesTable";
 
 export default function page() {

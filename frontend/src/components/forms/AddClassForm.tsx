@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { createClass } from "@/services/classes.service";
 import { IconBooks } from "@tabler/icons-react";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Classes } from "@/types/classes.types";
@@ -22,12 +22,18 @@ import { Classes } from "@/types/classes.types";
 export default function AddClassForm({
   setClasses,
 }: {
-  setClasses: (classes: Classes[]) => void;
+  setClasses: Dispatch<SetStateAction<Classes[]>>;
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [academicYear, setAcademicYear] = useState<string>("");
   const { register, handleSubmit, reset } = useForm();
-  const academicYear: any = localStorage.getItem("academicYear");
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setAcademicYear(localStorage.getItem("academicYear") || "");
+    }
+  }, []);
 
   const handleAddClass = async (data: any) => {
     try {

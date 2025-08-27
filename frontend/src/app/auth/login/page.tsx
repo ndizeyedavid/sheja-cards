@@ -1,14 +1,17 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
+// Imports
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Blocks } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { IconInnerShadowTop, IconLoader2 } from "@tabler/icons-react";
+import { IconInnerShadowTop } from "@tabler/icons-react";
 import Image from "next/image";
 
 import { useForm } from "react-hook-form";
@@ -16,23 +19,16 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogHeader,
-} from "@/components/ui/alert-dialog";
-
 import { useRouter, useSearchParams } from "next/navigation";
 import { signin } from "@/services/auth.service";
 import pb from "@/lib/pb";
 
+export const runtime = "edge";
+import { ApiError } from "@/types/api.types";
+
 const loginSchema = z
   .object({
-    email: z.email("Invalid email address"),
+    email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     remember: z.boolean(),
   })
@@ -44,15 +40,21 @@ export default function Page() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isNew, setIsNew] = useState<boolean>(false);
   const [schoolCount, setSchoolCount] = useState<number>(0);
-  const searcParams = useSearchParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
-    (async () => {
-      const count = await pb.collection("school").getFullList();
-      setSchoolCount(count.length);
-    })();
-    setIsNew(searcParams.get("new") ? true : false);
+    if (typeof window !== "undefined") {
+      (async () => {
+        try {
+          const count = await pb.collection("school").getFullList();
+          setSchoolCount(count.length);
+        } catch (error) {
+          console.error("Failed to fetch school count:", error);
+        }
+      })();
+      setIsNew(searchParams?.get("new") ? true : false);
+    }
   }, []);
 
   const {
@@ -69,19 +71,17 @@ export default function Page() {
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      console.log(data);
-      const user = await signin(data);
-      // console.log(user);
+      await signin(data);
       toast.success("Login successful");
-      router.replace(`/dashboard${searcParams.get("new") ? "?new=true" : ""}`);
+      router.replace(
+        `/dashboard${searchParams?.get("new") ? "?new=true" : ""}`
+      );
       reset();
-    } catch (error: any) {
-      console.error(error.response);
-      const errorMessage: string = error.response?.message || "Login failed";
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage = apiError.response?.message || "Login failed";
       toast.error(
-        error.response.status === 400
-          ? "Incorrect email or password"
-          : errorMessage
+        apiError.status === 400 ? "Incorrect email or password" : errorMessage
       );
     }
   };
@@ -176,6 +176,7 @@ export default function Page() {
                         errors.email ? "border-red-500" : ""
                       }`}
                       {...register("email")}
+                      disabled={isSubmitting}
                     />
                   </div>
                   {errors.email && (
@@ -197,20 +198,19 @@ export default function Page() {
                         errors.password ? "border-red-500" : ""
                       }`}
                       {...register("password")}
+                      disabled={isSubmitting}
                     />
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
                         <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
-                    </Button>
+                    </button>
                   </div>
                   {errors.password && (
                     <p className="text-sm text-red-500">
@@ -221,68 +221,44 @@ export default function Page() {
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="remember" {...register("remember")} />
-                  <Label htmlFor="remember" className="text-sm">
-                    Remember me
-                  </Label>
-                </div>
-                <Link href="forget-password">
-                  <Button type="button" variant="link" className="px-0 text-sm">
-                    Forgot password?
-                  </Button>
+                <Link
+                  href="/auth/forget-password"
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  Forgot password?
                 </Link>
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-12 gap-2"
+                className="w-full h-12"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
-                  <IconLoader2 className="size-4 animate-spin" />
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                    <span>Signing in...</span>
+                  </div>
                 ) : (
-                  <>
-                    Sign in
-                    <ArrowRight className="size-4" />
-                  </>
+                  <div className="flex items-center gap-2">
+                    <span>Sign in</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </div>
                 )}
               </Button>
             </form>
 
-            <div className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link href="signup">
-                <Button variant="link" className="px-0 font-medium">
-                  Sign up for free
-                </Button>
-              </Link>
+            <div className="flex items-center justify-center">
+              <span className="text-center">
+                Don't have an account?{" "}
+                <Link href="/auth/signup">
+                  <Button variant="link">Signup</Button>
+                </Link>
+              </span>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Recent signup notification dialog box */}
-      <AlertDialog open={isNew}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Thank you for choosing Sheja cards
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              It's a great honor for sheja cards to be serving you in managing
-              your school's student cards. Your account and school's account
-              have been successfully created now login to proceed to your
-              dashboard
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setIsNew(false)}>
-              Continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </section>
   );
 }

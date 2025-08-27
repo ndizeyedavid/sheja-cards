@@ -1,10 +1,15 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from "react";
+import { Students } from "@/types/student.types";
 import Filtercard from "@/components/cards/Filtercard";
 import StudentsTable from "@/components/tables/StudentsTable";
 import { fetchClasses } from "@/services/classes.service";
 import { fetchStudents } from "@/services/students.service";
+
+export const runtime = 'edge';
 import { toast } from "sonner";
 
 // const classes = ["S1", "S2", "S3", "S4 ACC"];
@@ -28,16 +33,18 @@ export default function page() {
     const [selectedClass, setSelectedClass] = useState<string>("-");
     const [isFiltered, setIsFiltered] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [students, setStudents] = useState([]);
+    const [students, setStudents] = useState<Students[]>([]);
     const [classes, setClasses] = useState([]);
 
     useEffect(() => {
         (async () => {
-            const params = new URLSearchParams(window.location.search);
-            const classParam = params.get("class");
-            if (classParam) {
-                setSelectedClass(classParam || "-");
-                setIsFiltered(true);
+            if (typeof window !== 'undefined') {
+                const params = new URLSearchParams(window.location.search);
+                const classParam = params.get("class");
+                if (classParam) {
+                    setSelectedClass(classParam || "-");
+                    setIsFiltered(true);
+                }
             }
         })();
     }, []);

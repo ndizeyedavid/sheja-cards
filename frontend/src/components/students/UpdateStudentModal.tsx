@@ -83,7 +83,11 @@ export function UpdateStudentModal({
   const onSubmit = async (data: StudentFormValues) => {
     try {
       setIsLoading(true);
-      const updatedStudent = await updateStudent(student.id, data);
+      const formattedData = {
+        ...data,
+        dateOfBirth: data.dateOfBirth.toISOString(),
+      };
+      const updatedStudent = await updateStudent(student.id, formattedData);
       onUpdateStudent(updatedStudent);
       toast.success("Student updated successfully");
       setOpen(false);

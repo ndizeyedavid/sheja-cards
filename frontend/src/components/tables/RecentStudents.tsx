@@ -14,7 +14,7 @@ import { recentStudents } from "@/services/students.service";
 import { useEffect, useState } from "react";
 import Loading from "./Loading";
 import { Skeleton } from "../ui/skeleton";
-import { Istudent } from "@/types/student.types";
+import { StudentRecord } from "@/types/student.types";
 
 export function RecentStudents() {
   const [students, setStudents] = useState([]);
@@ -65,12 +65,12 @@ export function RecentStudents() {
                   </TableCell>
                 </TableRow>
               ) : (
-                students.map((student: Istudent) => (
+                students.map((student: StudentRecord) => (
                   <TableRow key={student.registrationNumber + Math.random()}>
                     <TableCell>{student.registrationNumber}</TableCell>
                     <TableCell className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={student.avatar} alt={student.name} />
+                        <AvatarImage src={student.profileImage} alt={student.name} />
                         <AvatarFallback>
                           {student.name
                             .split(" ")
