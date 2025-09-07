@@ -158,13 +158,9 @@ export default function StudentsTable({
                       <RealtimeStudentModal
                         selectedClass={selectedClass}
                         onStudentUpdated={(updatedStudent) => {
-                          setStudents((prev: Students[]) =>
-                            prev.map((student) =>
-                              student.id === updatedStudent.id
-                                ? updatedStudent
-                                : student
-                            )
-                          );
+                          setStudents((prev: Students[]) => {
+                            return [...prev, updatedStudent];
+                          });
                         }}
                       >
                         <div className="flex items-center w-full px-2.5 py-1.5 text-sm hover:bg-primary rounded cursor-default">

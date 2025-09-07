@@ -48,7 +48,7 @@ import Image from "next/image";
 const studentSchema = z.object({
   name: z.string().min(1, "Name is required"),
   gender: z.enum(["MALE", "FEMALE"]),
-  dateOfBirth: z.date("Date of birth is required"),
+  dateOfBirth: z.any(),
   registrationNumber: z.string().optional(),
 });
 
@@ -76,7 +76,7 @@ export function RealtimeStudentModal({
     defaultValues: {
       name: "",
       gender: "MALE",
-      dateOfBirth: new Date(),
+      dateOfBirth: "",
       registrationNumber: "",
     },
   });
@@ -108,9 +108,7 @@ export function RealtimeStudentModal({
               form.reset({
                 name: newStudent.name || "",
                 gender: (newStudent.gender as "MALE" | "FEMALE") || "MALE",
-                dateOfBirth: newStudent.dateOfBirth
-                  ? new Date(newStudent.dateOfBirth)
-                  : new Date(),
+                dateOfBirth: "",
                 registrationNumber: newStudent.registrationNumber || "",
               });
 
