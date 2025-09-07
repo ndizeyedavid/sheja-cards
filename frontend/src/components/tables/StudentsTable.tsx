@@ -45,8 +45,10 @@ import { IconDownload } from "@tabler/icons-react";
 import { generateTemplate } from "./excel/Template";
 import { handleTemplate } from "./excel/UploadTemplate";
 import pb from "@/lib/pb";
-import { Image } from "lucide-react";
+import { Camera, Image, Smartphone } from "lucide-react";
 import { UploadImagesModal } from "../students/UploadImagesModal";
+import { CameraModal } from "../students/CameraModal";
+import { RealtimeStudentModal } from "../students/RealtimeStudentModal";
 
 interface StudentsTableProps {
   students: Students[];
@@ -140,6 +142,10 @@ export default function StudentsTable({
               </div>
 
               <div className="flex items-center">
+                <CameraModal
+                  selectedClass={selectedClass}
+                  onAddStudent={handleAddStudent}
+                />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="ml-4">
@@ -149,10 +155,33 @@ export default function StudentsTable({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem asChild>
+                      <RealtimeStudentModal
+                        selectedClass={selectedClass}
+                        onStudentUpdated={(updatedStudent) => {
+                          setStudents((prev: Students[]) =>
+                            prev.map((student) =>
+                              student.id === updatedStudent.id
+                                ? updatedStudent
+                                : student
+                            )
+                          );
+                        }}
+                      >
+                        <div className="flex items-center w-full px-2.5 py-1.5 text-sm hover:bg-primary rounded cursor-default">
+                          <Smartphone className="mr-3.5 h-4 w-4 opacity-60" />
+                          <span>Realtime Creation</span>
+                        </div>
+                      </RealtimeStudentModal>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
                       <UploadImagesModal
                         selectedClass={selectedClass}
                         onAddStudents={(newStudents) => {
-                          setStudents((prev: Students[]) => [...prev, ...newStudents]);
+                          setStudents((prev: Students[]) => [
+                            ...prev,
+                            ...newStudents,
+                          ]);
                         }}
                       />
                     </DropdownMenuItem>
@@ -207,7 +236,7 @@ export default function StudentsTable({
                             <AvatarImage
                               src={pb.files.getURL(
                                 student,
-                                student.avatar
+                                student.profileImage
                               )}
                               alt={student.name}
                             />
@@ -230,8 +259,9 @@ export default function StudentsTable({
                             : "-"}
                         </TableCell>
                         <TableCell>
-                          {student.expand?.class?.name}
-                          {student.expand?.class?.combination && ` ${student.expand.class.combination}`}
+                          {student.expand?.Class?.name +
+                            " " +
+                            student.expand?.Class?.combination}
                         </TableCell>
                         <TableCell>
                           <StatusBadge status={student.status} />

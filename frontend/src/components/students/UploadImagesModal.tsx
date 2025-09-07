@@ -112,7 +112,7 @@ export function UploadImagesModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <div className="flex items-center w-full px-2.5 py-1.5 text-sm hover:bg-gray-300/10 rounded cursor-default">
+        <div className="flex items-center w-full px-2.5 py-1.5 text-sm hover:bg-primary rounded cursor-default">
           <Image className="mr-3.5 h-4 w-4 opacity-60" />
           <span>Upload From Images</span>
         </div>

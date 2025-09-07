@@ -14,10 +14,11 @@ export interface Students {
   status: string;
   email: string;
   avatar: string;
+  profileImage: string;
   parent_phone?: string;
   dateOfBirth?: string;
   expand?: {
-    class?: {
+    Class?: {
       id: string;
       name: string;
       combination: string;
