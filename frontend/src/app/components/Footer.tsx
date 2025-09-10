@@ -12,8 +12,8 @@ import {
 import Link from "next/link";
 
 const data = {
-  instaLink: "https://instagram.com/mellow_junior1",
-  githubLink: "https://github.com/ndizeyedavid",
+  instaLink: "#",
+  githubLink: "#",
   services: {
     signup: "/auth/signup",
     dashboard: "/dashboard",
@@ -31,9 +31,9 @@ const data = {
     faqs: "/#faqs",
   },
   contact: {
-    email: "davidndizeye101@gmail.com",
-    phone: "+250 796 140 858",
-    address: "Rwanda, Eastern, Bugesera",
+    email: "sonia@gmail.com",
+    phone: "+250 794 715 042",
+    address: "Rwanda, Kigali city",
   },
   company: {
     name: "Sheja Cards",
@@ -108,7 +108,7 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
-            </ul>
+            </ul>ff
           </div>
 
           <div className="grid  grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 lg:col-span-2">
