@@ -526,12 +526,31 @@ export default function page() {
                                     </Button>
                                   </FileUploadTrigger>
                                 </FileUploadDropzone>
-                                {field.value?.map((file: File) => (
-                                  <FileUploadItem key={file.name} value={file}>
-                                    <FileUploadItemPreview />
-                                    <FileUploadItemMetadata />
-                                  </FileUploadItem>
-                                ))}
+                                {field.value && field.value.length > 0 && (
+                                  <div className="mt-4 space-y-3">
+                                    {field.value.map((file: File) => (
+                                      <div
+                                        key={file.name}
+                                        className="space-y-2"
+                                      >
+                                        <div className="relative w-full max-w-xs border rounded-lg overflow-hidden bg-muted p-2">
+                                          <img
+                                            src={URL.createObjectURL(file)}
+                                            alt="School Logo Preview"
+                                            className="w-full h-auto object-contain max-h-[200px]"
+                                          />
+                                        </div>
+                                        <FileUploadItem
+                                          key={file.name}
+                                          value={file}
+                                        >
+                                          <FileUploadItemPreview />
+                                          <FileUploadItemMetadata />
+                                        </FileUploadItem>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </FileUpload>
                             </FormControl>
                             <FormDescription>
