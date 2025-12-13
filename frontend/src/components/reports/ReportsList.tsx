@@ -20,7 +20,7 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
     null
   );
   const [showModal, setShowModal] = useState(false);
-  const [viewMode, setViewMode] = useState<"list" | "table">("list");
+  const [viewMode, setViewMode] = useState<"list" | "table">("table");
 
   const handlePrint = (report: StudentReport) => {
     // TODO: Implement print functionality
@@ -66,22 +66,13 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
 
   return (
     <>
-      <Card>
+      <Card className="overflow-auto">
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <CardTitle>Student Reports</CardTitle>
             <Badge variant="secondary">{reports.length} students</Badge>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant={viewMode === "list" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("list")}
-              className="gap-2"
-            >
-              <IconList className="h-4 w-4" />
-              List
-            </Button>
             <Button
               variant={viewMode === "table" ? "default" : "outline"}
               size="sm"
@@ -90,6 +81,16 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
             >
               <IconTable className="h-4 w-4" />
               Table
+            </Button>
+
+            <Button
+              variant={viewMode === "list" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className="gap-2"
+            >
+              <IconList className="h-4 w-4" />
+              List
             </Button>
           </div>
         </CardHeader>

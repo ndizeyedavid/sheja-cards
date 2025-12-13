@@ -41,7 +41,8 @@ export default function ReportsPage() {
       </div>
 
       {selectedClassId && (
-        <div className="grid gap-4 px-4 lg:px-6">
+        <div className="grid gap-4 px-4 lg:px-6 ">
+          {/* <div className="grid gap-4 px-4 lg:px-6 overflow-auto"> */}
           {performance && <PerformanceCard performance={performance} />}
           <ReportsList reports={reports} isLoading={isLoading} />
         </div>

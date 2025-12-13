@@ -56,22 +56,6 @@ export default function StudentReportsTable({
 
   return (
     <div className="border rounded-lg overflow-x-auto scrollbar-visible">
-      <style>{`
-        .scrollbar-visible::-webkit-scrollbar {
-          height: 8px;
-        }
-        .scrollbar-visible::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 4px;
-        }
-        .scrollbar-visible::-webkit-scrollbar-thumb {
-          background: #888;
-          border-radius: 4px;
-        }
-        .scrollbar-visible::-webkit-scrollbar-thumb:hover {
-          background: #555;
-        }
-      `}</style>
       <Table>
         <TableHeader>
           {/* Subject Names Row */}
@@ -82,31 +66,31 @@ export default function StudentReportsTable({
               <TableHead
                 key={`${subject.subjectId}-header`}
                 colSpan={3}
-                className="text-center font-bold text-sm border-r"
+                className="text-center font-bold text-sm border-r border-dashed border-white"
               >
                 {subject.subjectName}
               </TableHead>
             ))}
             <TableHead
               colSpan={3}
-              className="text-center font-bold text-sm border-r"
+              className="text-center font-bold text-sm border-r border-dashed border-white"
             >
               Totals
             </TableHead>
-            <TableHead className="text-center font-bold text-sm border-r">
+            <TableHead className="text-center font-bold text-sm border-r border-dashed border-white">
               %
             </TableHead>
-            <TableHead className="text-center min-w-[100px] sticky right-0 z-10">
+            <TableHead className="text-center min-w-[100px] sticky right-0 z-10 bg-primary">
               Actions
             </TableHead>
           </TableRow>
 
           {/* Mark Type Row */}
           <TableRow className="">
-            <TableHead className="w-12 text-center sticky left-0 z-10">
+            <TableHead className="w-12 text-center sticky left-0 z-10 bg-gray-800">
               Pos
             </TableHead>
-            <TableHead className="min-w-[150px] sticky left-12 z-10">
+            <TableHead className="min-w-[150px] sticky left-12 z-10 bg-gray-800">
               Student Name
             </TableHead>
             {reports[0].subjects.map((subject) => (
@@ -125,7 +109,7 @@ export default function StudentReportsTable({
                 </TableHead>
                 <TableHead
                   key={`${subject.subjectId}-tot`}
-                  className="text-center min-w-[60px] text-xs"
+                  className="text-center min-w-[60px] text-xs border-r border-dashed border-white"
                 >
                   TOT
                 </TableHead>
@@ -137,13 +121,13 @@ export default function StudentReportsTable({
             <TableHead className="text-center min-w-[80px] text-xs">
               EXAM
             </TableHead>
-            <TableHead className="text-center min-w-[80px] text-xs">
+            <TableHead className="text-center min-w-[80px] text-xs border-r border-dashed border-white">
               TOTAL
             </TableHead>
-            <TableHead className="text-center min-w-[60px] text-xs">
+            <TableHead className="text-center min-w-[60px] text-xs border-r border-dashed border-white">
               %
             </TableHead>
-            <TableHead className="text-center min-w-[100px] sticky right-0 z-10">
+            <TableHead className="text-center min-w-[100px] sticky right-0 z-10 bg-primary">
               Actions
             </TableHead>
           </TableRow>
@@ -155,10 +139,10 @@ export default function StudentReportsTable({
 
             return (
               <TableRow key={report.id} className="hover:bg-primary/5">
-                <TableCell className="text-center font-semibold sticky left-0 z-10">
+                <TableCell className="text-center font-semibold sticky left-0 z-10 bg-gray-800">
                   <Badge variant="outline">#{report.position}</Badge>
                 </TableCell>
-                <TableCell className="font-medium sticky left-12 z-10">
+                <TableCell className="font-medium sticky left-12 z-10 bg-gray-800">
                   {report.name}
                 </TableCell>
 
@@ -179,7 +163,7 @@ export default function StudentReportsTable({
                     </TableCell>
                     <TableCell
                       key={`${report.id}-${subject.subjectId}-tot`}
-                      className="text-center font-semibold text-purple-600"
+                      className="text-center font-semibold text-purple-600 border-r border-dashed border-white"
                     >
                       {subject.total}
                     </TableCell>
@@ -192,14 +176,14 @@ export default function StudentReportsTable({
                 <TableCell className="text-center font-semibold text-green-600">
                   {report.examTotal}
                 </TableCell>
-                <TableCell className="text-center font-semibold text-purple-600">
+                <TableCell className="text-center font-semibold text-purple-600 border-r border-dashed border-white">
                   {report.total}
                 </TableCell>
-                <TableCell className="text-center font-semibold">
+                <TableCell className="text-center font-semibold border-r border-dashed border-white">
                   {percentage}%
                 </TableCell>
 
-                <TableCell className="text-center sticky right-0 z-10">
+                <TableCell className="text-center sticky right-0 z-10 bg-primary">
                   <div className="flex items-center justify-center gap-1">
                     <Button
                       variant="ghost"
