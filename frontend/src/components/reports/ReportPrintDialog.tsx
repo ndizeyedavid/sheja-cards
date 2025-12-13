@@ -48,16 +48,16 @@ export default function ReportPrintDialog({
       const originalStyles = new Map<HTMLElement, string>();
 
       // Clean all inline styles that contain lab() colors
+      const COLOR_FN_REGEX = /(lab|oklab|oklch|lch|color|color-mix)\([^)]*\)/gi;
       printRef.current.querySelectorAll("*").forEach((el) => {
         const element = el as HTMLElement;
         const style = element.getAttribute("style");
-        if (style && (style.includes("lab(") || style.includes("color-mix("))) {
+        if (style && COLOR_FN_REGEX.test(style)) {
           originalStyles.set(element, style);
           const cleanedStyle = style
-            .replace(/lab\([^)]*\)/g, "#000000")
-            .replace(/color-mix\([^)]*\)/g, "#000000")
-            .replace(/background:\s*lab\([^)]*\)/g, "background: #ffffff")
-            .replace(/color:\s*lab\([^)]*\)/g, "color: #000000");
+            .replace(COLOR_FN_REGEX, "#000000")
+            .replace(/background:\s*(lab|oklab|oklch|lch|color|color-mix)\([^)]*\)/gi, "background: #ffffff")
+            .replace(/color:\s*(lab|oklab|oklch|lch|color|color-mix)\([^)]*\)/gi, "color: #000000");
           element.setAttribute("style", cleanedStyle);
         }
       });
@@ -75,6 +75,11 @@ export default function ReportPrintDialog({
           clonedDoc.querySelectorAll("*").forEach((el) => {
             el.removeAttribute("class");
           });
+          const styleEl = clonedDoc.createElement("style");
+          styleEl.setAttribute("data-html2canvas-fallback", "true");
+          styleEl.textContent = 
+            ":root{--background:#ffffff;--foreground:#000000;--card:#ffffff;--card-foreground:#000000;--popover:#ffffff;--popover-foreground:#000000;--primary:#000000;--primary-foreground:#ffffff;--secondary:#cccccc;--secondary-foreground:#000000;--muted:#dddddd;--muted-foreground:#333333;--accent:#eeeeee;--accent-foreground:#111111;--destructive:#ff0000;--border:#000000;--input:#000000;--ring:#000000;--chart-1:#000000;--chart-2:#444444;--chart-3:#777777;--chart-4:#aaaaaa;--chart-5:#cccccc;--sidebar:#ffffff;--sidebar-foreground:#000000;--sidebar-primary:#000000;--sidebar-primary-foreground:#ffffff;--sidebar-accent:#eeeeee;--sidebar-accent-foreground:#111111;--sidebar-border:#000000;--sidebar-ring:#000000;}\nbody{background:#ffffff !important;}\n*{background-image:none !important;}";
+          clonedDoc.head.appendChild(styleEl);
         },
       });
 

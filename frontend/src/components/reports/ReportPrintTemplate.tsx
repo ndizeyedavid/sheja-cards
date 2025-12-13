@@ -501,7 +501,7 @@ export const ReportPrintTemplate = ({
         {/* Footer Section */}
         <div
           style={{
-            marginTop: "40px",
+            marginTop: "5px",
           }}
           className="flex flex-col gap-1"
         >

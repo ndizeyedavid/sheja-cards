@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { StudentReport } from "@/types/reports.types";
 import StudentReportRow from "./StudentReportRow";
 import StudentReportsTable from "./StudentReportsTable";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import StudentReportModal from "./StudentReportModal";
 import ReportPrintDialog from "./ReportPrintDialog";
-import { IconList, IconTable } from "@tabler/icons-react";
+import { IconList, IconTable, IconPrinter } from "@tabler/icons-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import ReportPrintTemplate from "./ReportPrintTemplate";
 
 interface ReportsListProps {
   reports: StudentReport[];
@@ -26,6 +29,8 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
     null
   );
   const [viewMode, setViewMode] = useState<"list" | "table">("table");
+  const [isGeneratingClass, setIsGeneratingClass] = useState(false);
+  const batchPrintRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = (report: StudentReport) => {
     setReportToPrint(report);
@@ -35,6 +40,90 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
   const handleView = (report: StudentReport) => {
     setSelectedReport(report);
     setShowModal(true);
+  };
+
+  const handlePrintClass = async () => {
+    if (!batchPrintRef.current || reports.length === 0) return;
+    setIsGeneratingClass(true);
+    try {
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+      const wrappers = Array.from(
+        batchPrintRef.current.querySelectorAll("[data-report-print-item]")
+      ) as HTMLElement[];
+
+      for (let i = 0; i < wrappers.length; i++) {
+        const el = wrappers[i];
+        const originalStyles = new Map<HTMLElement, string>();
+        const COLOR_FN_REGEX =
+          /(lab|oklab|oklch|lch|color|color-mix)\([^)]*\)/gi;
+        el.querySelectorAll("*").forEach((node) => {
+          const element = node as HTMLElement;
+          const style = element.getAttribute("style");
+          if (style && COLOR_FN_REGEX.test(style)) {
+            originalStyles.set(element, style);
+            const cleaned = style
+              .replace(COLOR_FN_REGEX, "#000000")
+              .replace(
+                /background:\s*(lab|oklab|oklch|lch|color|color-mix)\([^)]*\)/gi,
+                "background: #ffffff"
+              )
+              .replace(
+                /color:\s*(lab|oklab|oklch|lch|color|color-mix)\([^)]*\)/gi,
+                "color: #000000"
+              );
+            element.setAttribute("style", cleaned);
+          }
+        });
+
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff",
+          allowTaint: false,
+          foreignObjectRendering: false,
+          onclone: (clonedDoc) => {
+            clonedDoc.querySelectorAll("*").forEach((n) => {
+              n.removeAttribute("class");
+            });
+            const styleEl = clonedDoc.createElement("style");
+            styleEl.setAttribute("data-html2canvas-fallback", "true");
+            styleEl.textContent =
+              ":root{--background:#ffffff;--foreground:#000000;--card:#ffffff;--card-foreground:#000000;--popover:#ffffff;--popover-foreground:#000000;--primary:#000000;--primary-foreground:#ffffff;--secondary:#cccccc;--secondary-foreground:#000000;--muted:#dddddd;--muted-foreground:#333333;--accent:#eeeeee;--accent-foreground:#111111;--destructive:#ff0000;--border:#000000;--input:#000000;--ring:#000000;--chart-1:#000000;--chart-2:#444444;--chart-3:#777777;--chart-4:#aaaaaa;--chart-5:#cccccc;--sidebar:#ffffff;--sidebar-foreground:#000000;--sidebar-primary:#000000;--sidebar-primary-foreground:#ffffff;--sidebar-accent:#eeeeee;--sidebar-accent-foreground:#111111;--sidebar-border:#000000;--sidebar-ring:#000000;}";
+            clonedDoc.head.appendChild(styleEl);
+          },
+        });
+
+        originalStyles.forEach((originalStyle, element) => {
+          element.setAttribute("style", originalStyle);
+        });
+
+        const A4_WIDTH = 210;
+        const A4_HEIGHT = 297;
+        const pageW = A4_WIDTH - 10;
+        const pageH = A4_HEIGHT - 10;
+        const imgData = canvas.toDataURL("image/png");
+        const imgHeightByWidth = (canvas.height * pageW) / canvas.width;
+        if (imgHeightByWidth <= pageH) {
+          pdf.addImage(imgData, "PNG", 5, 5, pageW, imgHeightByWidth);
+        } else {
+          const wByHeight = (canvas.width * pageH) / canvas.height;
+          const x = (A4_WIDTH - wByHeight) / 2;
+          pdf.addImage(imgData, "PNG", x, 5, wByHeight, pageH);
+        }
+        if (i < wrappers.length - 1) pdf.addPage();
+      }
+
+      pdf.save(`Class_Reports_${new Date().getTime()}.pdf`);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGeneratingClass(false);
+    }
   };
 
   if (isLoading) {
@@ -97,6 +186,17 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
               <IconList className="h-4 w-4" />
               List
             </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrintClass}
+              disabled={isGeneratingClass}
+              className="gap-2"
+            >
+              <IconPrinter className="h-4 w-4" />
+              {isGeneratingClass ? "Printing..." : "Print Class"}
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -145,6 +245,33 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
           email: "info@sheja.edu.rw",
         }}
       />
+
+      <div
+        ref={batchPrintRef}
+        style={{
+          position: "fixed",
+          left: "-10000px",
+          top: 0,
+          backgroundColor: "#ffffff",
+          padding: "16px",
+          width: "800px",
+        }}
+      >
+        {reports.map((r) => (
+          <div key={r.id} data-report-print-item>
+            <ReportPrintTemplate
+              report={r}
+              schoolName={"SHEJA SCHOOL"}
+              schoolInfo={{
+                district: "KICUKIRO",
+                poBox: "3806",
+                phone: "0784605269",
+                email: "info@sheja.edu.rw",
+              }}
+            />
+          </div>
+        ))}
+      </div>
     </>
   );
 }
