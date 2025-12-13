@@ -1,0 +1,29 @@
+
+.container{
+	display: flex;
+}
+
+.location{
+	flex: 10px;
+}
+
+.logo{
+	flex: 40px;
+}
+
+.id{
+	flex: 10px;
+}
+
+.decision{
+	flex: 60rem;
+}
+
+.footer{
+	flex: 10%;
+}
+.table{
+	width: 100%;
+	border: none;
+	border-collapse: collapse;
+}

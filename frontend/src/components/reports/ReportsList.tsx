@@ -8,6 +8,7 @@ import StudentReportRow from "./StudentReportRow";
 import StudentReportsTable from "./StudentReportsTable";
 import { useState } from "react";
 import StudentReportModal from "./StudentReportModal";
+import ReportPrintDialog from "./ReportPrintDialog";
 import { IconList, IconTable } from "@tabler/icons-react";
 
 interface ReportsListProps {
@@ -20,11 +21,15 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
     null
   );
   const [showModal, setShowModal] = useState(false);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [reportToPrint, setReportToPrint] = useState<StudentReport | null>(
+    null
+  );
   const [viewMode, setViewMode] = useState<"list" | "table">("table");
 
   const handlePrint = (report: StudentReport) => {
-    // TODO: Implement print functionality
-    window.print();
+    setReportToPrint(report);
+    setShowPrintDialog(true);
   };
 
   const handleView = (report: StudentReport) => {
@@ -123,6 +128,23 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
           onOpenChange={setShowModal}
         />
       )}
+
+      <ReportPrintDialog
+        isOpen={showPrintDialog}
+        onClose={() => {
+          setShowPrintDialog(false);
+          setReportToPrint(null);
+        }}
+        report={reportToPrint}
+        schoolInfo={{
+          name: "SHEJA SCHOOL",
+          province: "KIGALI CITY",
+          district: "KICUKIRO",
+          poBox: "3806",
+          phone: "0784605269",
+          email: "info@sheja.edu.rw",
+        }}
+      />
     </>
   );
 }
