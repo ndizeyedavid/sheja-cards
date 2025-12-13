@@ -10,82 +10,91 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import pb from "@/lib/pb";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   IconBook,
   IconUsers,
-  IconClipboardList,
-  IconCalendar,
-  IconBell,
-  IconLogout,
-  IconChevronRight,
-  IconGraduate,
   IconFileText,
-  IconBarChart,
+  IconEdit,
+  IconEye,
 } from "@tabler/icons-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-
-interface TeacherInfo {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  avatar?: string;
-  phone?: string;
-}
-
-interface ClassInfo {
-  id: string;
-  name: string;
-  combination?: string;
-  studentCount?: number;
-}
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  getTeacherInfo,
+  fetchTeacherClassesAndSubjects,
+  fetchStudentsByClass,
+  type TeacherInfo,
+  type ClassInfo,
+  type SubjectInfo,
+  type StudentInfo,
+} from "@/services/teacher.service";
+import {
+  initializeMarksForSubject,
+  batchSaveMarks,
+  type StudentMark,
+} from "@/services/marks.service";
+import { StudentDetailsModal } from "@/components/modals/StudentDetailsModal";
+import { ClassDetailsModal } from "@/components/modals/ClassDetailsModal";
+import { SubjectDetailsModal } from "@/components/modals/SubjectDetailsModal";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import pb from "@/lib/pb";
 
 export default function TeacherDashboard() {
   const [teacher, setTeacher] = useState<TeacherInfo | null>(null);
   const [classes, setClasses] = useState<ClassInfo[]>([]);
+  const [subjects, setSubjects] = useState<SubjectInfo[]>([]);
+  const [students, setStudents] = useState<StudentInfo[]>([]);
+  const [marks, setMarks] = useState<StudentMark[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
+  const [selectedClass, setSelectedClass] = useState<string>("");
+  const [selectedSubject, setSelectedSubject] = useState<string>("");
+  const [isSavingMarks, setIsSavingMarks] = useState(false);
+
+  // Modal states
+  const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(
+    null
+  );
+  const [studentModalOpen, setStudentModalOpen] = useState(false);
+  const [selectedClassForModal, setSelectedClassForModal] =
+    useState<ClassInfo | null>(null);
+  const [classModalOpen, setClassModalOpen] = useState(false);
+  const [selectedSubjectForModal, setSelectedSubjectForModal] =
+    useState<SubjectInfo | null>(null);
+  const [subjectModalOpen, setSubjectModalOpen] = useState(false);
 
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        // Get current teacher info
-        if (pb.authStore.isValid && pb.authStore.record) {
-          setTeacher({
-            id: pb.authStore.record.id,
-            name: pb.authStore.record.name,
-            email: pb.authStore.record.email,
-            role: pb.authStore.record.role,
-            avatar: pb.authStore.record.avatar,
-            phone: pb.authStore.record.phone,
-          });
-
-          // Fetch classes assigned to this teacher
-          const classRecords = await pb.collection("subjects").getFullList({
-            filter: `assignedTeacher = "${pb.authStore.record.id}"`,
-            expand: "assignedClass",
-          });
-
-          // Extract unique classes
-          const uniqueClasses: { [key: string]: ClassInfo } = {};
-          classRecords.forEach((subject: any) => {
-            if (subject.expand?.assignedClass) {
-              const classData = subject.expand.assignedClass;
-              if (!uniqueClasses[classData.id]) {
-                uniqueClasses[classData.id] = {
-                  id: classData.id,
-                  name: classData.name,
-                  combination: classData.combination,
-                };
-              }
-            }
-          });
-
-          setClasses(Object.values(uniqueClasses));
+        // Get teacher info
+        const teacherData = getTeacherInfo();
+        if (!teacherData) {
+          toast.error("Failed to load teacher information");
+          return;
         }
+        setTeacher(teacherData);
+
+        // Fetch classes and subjects
+        const { classes: classesData, subjects: subjectsData } =
+          await fetchTeacherClassesAndSubjects();
+        // console.log(classesData);
+        setClasses(classesData);
+        setSubjects(subjectsData);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
         toast.error("Failed to load dashboard data");
@@ -97,148 +106,375 @@ export default function TeacherDashboard() {
     loadDashboardData();
   }, []);
 
-  const handleLogout = async () => {
-    pb.authStore.clear();
-    toast.success("Logged out successfully");
-    router.push("/teacher/auth/login");
+  const handleClassChange = async (classId: string) => {
+    setSelectedClass(classId);
+    setSelectedSubject("");
+    setMarks([]);
+
+    try {
+      const studentsData = await fetchStudentsByClass(classId);
+      setStudents(studentsData);
+    } catch (error) {
+      console.error("Error loading students:", error);
+      toast.error("Failed to load students");
+    }
+  };
+
+  const handleSubjectChange = async (subjectId: string) => {
+    setSelectedSubject(subjectId);
+
+    try {
+      const marksData = await initializeMarksForSubject(
+        selectedClass,
+        subjectId
+      );
+      setMarks(marksData);
+    } catch (error) {
+      console.error("Error loading marks:", error);
+      toast.error("Failed to load marks");
+    }
+  };
+
+  const handleMarkChange = (
+    studentId: string,
+    type: "cat" | "exam",
+    value: number
+  ) => {
+    setMarks((prevMarks) =>
+      prevMarks.map((mark) =>
+        mark.studentId === studentId ? { ...mark, [type]: value } : mark
+      )
+    );
+  };
+
+  const handleSaveMarks = async () => {
+    if (!selectedSubject) {
+      toast.error("Please select a subject");
+      return;
+    }
+
+    setIsSavingMarks(true);
+    try {
+      await batchSaveMarks(marks, selectedSubject);
+      toast.success("Marks saved successfully!");
+    } catch (error) {
+      console.error("Error saving marks:", error);
+      toast.error("Failed to save marks");
+    } finally {
+      setIsSavingMarks(false);
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-        <div className="max-w-7xl mx-auto p-4 md:p-8">
-          <Skeleton className="h-20 w-full mb-8" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-32" />
-            ))}
-          </div>
-          <Skeleton className="h-96" />
-        </div>
+      <div className="max-w-7xl mx-auto p-4 md:p-8">
+        <Skeleton className="h-12 w-48 mb-8" />
+        <Skeleton className="h-96" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-      {/* Header Section */}
-      <div className="bg-white dark:bg-slate-950 border-b sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <IconGraduate className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold">Teacher Portal</h1>
-              <p className="text-xs text-muted-foreground">SHEJA</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="relative">
-              <IconBell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="gap-2"
-            >
-              <IconLogout className="w-4 h-4" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
+    <>
       <div className="max-w-7xl mx-auto p-4 md:p-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">
-            Welcome back, {teacher?.name}! 👋
-          </h2>
+          <h1 className="text-3xl font-bold mb-2">
+            Welcome, {teacher?.name}! 👋
+          </h1>
           <p className="text-muted-foreground">
-            Here's what's happening in your classes today
+            Manage marks, view students, and track your classes
           </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <IconUsers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                Total Classes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{classes.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Classes assigned to you
-              </p>
-            </CardContent>
-          </Card>
+        {/* Tabs for Main Sections */}
+        <Tabs defaultValue="marks" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
+            <TabsTrigger value="marks" className="gap-2">
+              <IconFileText className="w-4 h-4" />
+              <span className="hidden sm:inline">Marks Entry</span>
+            </TabsTrigger>
+            <TabsTrigger value="students" className="gap-2">
+              <IconUsers className="w-4 h-4" />
+              <span className="hidden sm:inline">Students</span>
+            </TabsTrigger>
+            <TabsTrigger value="classes" className="gap-2">
+              <IconBook className="w-4 h-4" />
+              <span className="hidden sm:inline">Classes</span>
+            </TabsTrigger>
+            <TabsTrigger value="subjects" className="gap-2">
+              <IconEdit className="w-4 h-4" />
+              <span className="hidden sm:inline">Subjects</span>
+            </TabsTrigger>
+          </TabsList>
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <IconClipboardList className="w-4 h-4 text-green-600 dark:text-green-400" />
-                </div>
-                Pending Tasks
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">3</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Tasks to complete
-              </p>
-            </CardContent>
-          </Card>
+          {/* Marks Entry Tab */}
+          <TabsContent value="marks" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <IconFileText className="w-5 h-5" />
+                  Record Student Marks
+                </CardTitle>
+                <CardDescription>
+                  Enter CAT and exam marks for your students
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Class and Subject Selection */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      Select Class
+                    </label>
+                    <Select
+                      value={selectedClass}
+                      onValueChange={handleClassChange}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Choose a class" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {classes.map((cls) => (
+                          <SelectItem key={cls.id} value={cls.id}>
+                            {cls.name}
+                            {cls.combination && ` (${cls.combination})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                  <IconFileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      Select Subject
+                    </label>
+                    <Select
+                      value={selectedSubject}
+                      onValueChange={handleSubjectChange}
+                      disabled={!selectedClass}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Choose a subject" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subjects
+                          .filter((s) => s.assignedClass === selectedClass)
+                          .map((subject) => (
+                            <SelectItem key={subject.id} value={subject.id}>
+                              {subject.subjectName}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                Submissions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Pending review
-              </p>
-            </CardContent>
-          </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                  <IconBarChart className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                {/* Marks Table */}
+                {marks.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto border rounded-lg">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Student Name</TableHead>
+                            <TableHead className="text-center">
+                              CAT Marks
+                            </TableHead>
+                            <TableHead className="text-center">
+                              Exam Marks
+                            </TableHead>
+                            <TableHead className="text-center">Total</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {marks.map((mark) => (
+                            <TableRow key={mark.studentId}>
+                              <TableCell className="font-medium">
+                                {mark.studentName}
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  value={mark.cat}
+                                  onChange={(e) =>
+                                    handleMarkChange(
+                                      mark.studentId,
+                                      "cat",
+                                      parseInt(e.target.value) || 0
+                                    )
+                                  }
+                                  className="text-center"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  value={mark.exam}
+                                  onChange={(e) =>
+                                    handleMarkChange(
+                                      mark.studentId,
+                                      "exam",
+                                      parseInt(e.target.value) || 0
+                                    )
+                                  }
+                                  className="text-center"
+                                />
+                              </TableCell>
+                              <TableCell className="text-center font-semibold">
+                                {mark.cat + mark.exam}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    <Button
+                      onClick={handleSaveMarks}
+                      disabled={isSavingMarks}
+                      className="w-full"
+                    >
+                      {isSavingMarks ? "Saving..." : "Save Marks"}
+                    </Button>
+                  </div>
+                )}
+
+                {selectedClass && !selectedSubject && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Select a subject to begin entering marks</p>
+                  </div>
+                )}
+
+                {!selectedClass && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Select a class first</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Students Tab */}
+          <TabsContent value="students" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <IconUsers className="w-5 h-5" />
+                  View Students
+                </CardTitle>
+                <CardDescription>
+                  View all students in your classes
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Select Class
+                  </label>
+                  <Select
+                    value={selectedClass}
+                    onValueChange={handleClassChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a class" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {classes.map((cls) => (
+                        <SelectItem key={cls.id} value={cls.id}>
+                          {cls.name}
+                          {cls.combination && ` (${cls.combination})`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                Avg. Performance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">78%</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Class average
-              </p>
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Classes Section */}
-          <div className="lg:col-span-2 space-y-6">
+                {students.length > 0 && (
+                  <div className="overflow-x-auto border rounded-lg">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Photo</TableHead>
+                          <TableHead>Reg Number</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Gender</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-center">Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {students.map((student) => (
+                          <TableRow key={student.id}>
+                            <TableCell className="font-medium">
+                              <Avatar>
+                                <AvatarImage
+                                  src={pb.files.getURL(
+                                    student.fullStack[0],
+                                    student.profileImage
+                                  )}
+                                  alt={student.name + "_photo"}
+                                />
+                                <AvatarFallback className="border-2">
+                                  {student.name
+                                    .split(" ")
+                                    .map((n: string) => n[0])
+                                    .join("")}
+                                </AvatarFallback>
+                              </Avatar>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {student.registrationNumber}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {student.name}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {student.gender}
+                            </TableCell>
+                            <TableCell>{student.status}</TableCell>
+                            <TableCell className="text-center">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="gap-2"
+                                onClick={() => {
+                                  setSelectedStudent(student);
+                                  setStudentModalOpen(true);
+                                }}
+                              >
+                                <IconEye className="w-4 h-4" />
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+
+                {selectedClass && students.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>No students in this class</p>
+                  </div>
+                )}
+
+                {!selectedClass && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Select a class to view students</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Classes Tab */}
+          <TabsContent value="classes" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -246,191 +482,146 @@ export default function TeacherDashboard() {
                   Your Classes
                 </CardTitle>
                 <CardDescription>
-                  Manage and view your assigned classes
+                  View all your assigned classes
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {classes.length > 0 ? (
                   <div className="space-y-3">
                     {classes.map((classItem) => (
-                      <Link
+                      <div
                         key={classItem.id}
-                        href={`/teacher/classes/${classItem.id}`}
+                        className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                       >
-                        <div className="p-4 rounded-lg border hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-semibold group-hover:text-primary transition-colors">
-                                {classItem.name}
-                                {classItem.combination && (
-                                  <span className="text-xs text-muted-foreground ml-2">
-                                    ({classItem.combination})
-                                  </span>
-                                )}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                Manage students and marks
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-semibold">{classItem.name}</h3>
+                            {classItem.combination && (
+                              <p className="text-sm text-muted-foreground">
+                                {classItem.combination}
                               </p>
-                            </div>
-                            <IconChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                            )}
                           </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => {
+                              setSelectedClassForModal(classItem);
+                              setClassModalOpen(true);
+                            }}
+                          >
+                            <IconEye className="w-4 h-4" />
+                            View
+                          </Button>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <IconBook className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                    <p className="text-muted-foreground">
-                      No classes assigned yet
-                    </p>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>No classes assigned yet</p>
                   </div>
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* Quick Actions */}
+          {/* Subjects Tab */}
+          <TabsContent value="subjects" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <IconCalendar className="w-5 h-5" />
-                  Quick Actions
+                  <IconEdit className="w-4 h-4" />
+                  Your Subjects
                 </CardTitle>
+                <CardDescription>
+                  View all your assigned subjects
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    className="h-auto py-3 flex-col gap-2"
-                  >
-                    <IconFileText className="w-5 h-5" />
-                    <span className="text-xs">Record Marks</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-auto py-3 flex-col gap-2"
-                  >
-                    <IconBarChart className="w-5 h-5" />
-                    <span className="text-xs">View Reports</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-auto py-3 flex-col gap-2"
-                  >
-                    <IconUsers className="w-5 h-5" />
-                    <span className="text-xs">Manage Students</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-auto py-3 flex-col gap-2"
-                  >
-                    <IconClipboardList className="w-5 h-5" />
-                    <span className="text-xs">Attendance</span>
-                  </Button>
-                </div>
+                {subjects.length > 0 ? (
+                  <div className="space-y-3">
+                    {subjects.map((subject) => {
+                      const classData = classes.find(
+                        (c) => c.id === subject.assignedClass
+                      );
+                      return (
+                        <div
+                          key={subject.id + Math.random()}
+                          className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-semibold">
+                                {subject.subjectName}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {classData?.name}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-2"
+                              onClick={() => {
+                                setSelectedSubjectForModal(subject);
+                                setSubjectModalOpen(true);
+                              }}
+                            >
+                              <IconEye className="w-4 h-4" />
+                              View
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>No subjects assigned yet</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
+        </Tabs>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Profile Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Profile</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-lg font-semibold text-primary">
-                      {teacher?.name?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate">{teacher?.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {teacher?.email}
-                    </p>
-                  </div>
-                </div>
+        {/* Modals */}
+        <StudentDetailsModal
+          student={selectedStudent}
+          isOpen={studentModalOpen}
+          onClose={() => {
+            setStudentModalOpen(false);
+            setSelectedStudent(null);
+          }}
+        />
 
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <p className="text-muted-foreground text-xs">Role</p>
-                    <p className="font-medium capitalize">{teacher?.role}</p>
-                  </div>
-                  {teacher?.phone && (
-                    <div>
-                      <p className="text-muted-foreground text-xs">Phone</p>
-                      <p className="font-medium">{teacher?.phone}</p>
-                    </div>
-                  )}
-                </div>
+        <ClassDetailsModal
+          classData={selectedClassForModal}
+          isOpen={classModalOpen}
+          onClose={() => {
+            setClassModalOpen(false);
+            setSelectedClassForModal(null);
+          }}
+        />
 
-                <Button variant="outline" className="w-full">
-                  Edit Profile
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex gap-3 text-sm">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium">Marks recorded</p>
-                      <p className="text-xs text-muted-foreground">
-                        2 hours ago
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 text-sm">
-                    <div className="w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium">Class attendance updated</p>
-                      <p className="text-xs text-muted-foreground">
-                        5 hours ago
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 text-sm">
-                    <div className="w-2 h-2 rounded-full bg-purple-500 mt-1.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium">Report generated</p>
-                      <p className="text-xs text-muted-foreground">1 day ago</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Help & Support */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Need Help?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Check our documentation or contact support
-                </p>
-                <div className="space-y-2">
-                  <Button variant="outline" className="w-full text-xs">
-                    Documentation
-                  </Button>
-                  <Button variant="outline" className="w-full text-xs">
-                    Contact Support
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <SubjectDetailsModal
+          subject={selectedSubjectForModal}
+          classData={
+            selectedSubjectForModal
+              ? classes.find(
+                  (c) => c.id === selectedSubjectForModal.assignedClass
+                ) || null
+              : null
+          }
+          isOpen={subjectModalOpen}
+          onClose={() => {
+            setSubjectModalOpen(false);
+            setSelectedSubjectForModal(null);
+          }}
+        />
       </div>
-    </div>
+    </>
   );
 }
