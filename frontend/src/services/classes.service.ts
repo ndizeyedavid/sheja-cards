@@ -35,21 +35,24 @@ export const createClass = async (body: any) => {
     id: res.id,
     name: res.name,
     combination: res.combination,
-    academicYear: res.academicYear
+    academicYear: res.academicYear,
   };
 };
 
 export const fetchClasses = async (): Promise<Classes[]> => {
   const schoolId = pb.authStore.record?.school;
+  // console.log(schoolId);
   const academicYear = localStorage.getItem("academicYear");
   const res = await pb.collection("classes").getFullList({
     filter: `school = "${schoolId}" && academicYear="${academicYear}" && isDeleted = false`,
+    expand: "school",
   });
-  return res.map(classData => ({
+  return res.map((classData) => ({
     id: classData.id,
     name: classData.name,
     combination: classData.combination,
-    academicYear: classData.academicYear
+    academicYear: classData.academicYear,
+    school: classData.expand?.school.name,
   }));
 };
 
@@ -93,6 +96,6 @@ export const updateClass = async (id: string, body: any) => {
     id: updatedData.id,
     name: updatedData.name,
     combination: updatedData.combination,
-    academicYear: updatedData.academicYear
+    academicYear: updatedData.academicYear,
   };
 };

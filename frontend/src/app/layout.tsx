@@ -31,7 +31,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <BetaRibbon />
+          {/* <BetaRibbon /> */}
           {children}
         </ThemeProvider>
       </body>

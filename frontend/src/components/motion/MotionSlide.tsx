@@ -5,7 +5,6 @@ import { ReactNode } from "react";
 
 interface MotionSlideProps {
   children: ReactNode;
-  key: string | number | undefined;
 }
 
 const slideVariants = {
@@ -25,10 +24,9 @@ const slideVariants = {
   }),
 };
 
-export function MotionSlide({ children, key }: MotionSlideProps) {
+export function MotionSlide({ children }: MotionSlideProps) {
   return (
     <motion.div
-      key={key}
       initial="enter"
       animate="center"
       exit="exit"

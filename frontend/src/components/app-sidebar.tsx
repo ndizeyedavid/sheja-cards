@@ -7,6 +7,8 @@ import {
   IconInnerShadowTop,
   IconUserUp,
   IconIdBadge2,
+  IconFileIsr,
+  IconChecklist,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -51,13 +53,18 @@ const data = {
       url: "/dashboard/staff",
       icon: IconUserUp,
     },
-    // {
-    //   title: "Templates",
-    //   url: "/dashboard/templates",
-    //   icon: IconCertificate,
-    // },
     {
-      title: "Card Generator",
+      title: "Subjects",
+      url: "/dashboard/subjects",
+      icon: IconCertificate,
+    },
+    {
+      title: "Reports",
+      url: "/dashboard/reports",
+      icon: IconChecklist,
+    },
+    {
+      title: "Student Cards",
       url: "/dashboard/card-generator",
       icon: IconIdBadge2,
     },
