@@ -5,3 +5,6 @@
 Sheja is a modern multi-tenant platform designed to help schools manage student records and generate custom student ID cards. It includes full authentication, role-based access, class and student management, and PDF export features, all backed by a robust Express API and a beautiful Next.js dashboard.
 
 ---
+# New update (Report card Generation)
+
+<img width="1600" height="899" alt="image" src="https://github.com/user-attachments/assets/ee2d78c6-c2cf-4a06-bedd-89dae02fa0e8" />
