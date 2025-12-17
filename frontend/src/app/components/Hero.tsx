@@ -6,6 +6,7 @@ import { ArrowRight, ChevronRight, ExternalLink, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { IconChalkboardTeacher } from "@tabler/icons-react";
 
 export default function Hero() {
   return (
@@ -79,17 +80,14 @@ export default function Hero() {
               </Button>
             </Link>
 
-            <Link
-              href="https://github.com/ndizeyedavid/sheja-cards/"
-              target="_blank"
-            >
+            <Link href="teacher/auth/login" target="_blank">
               <Button
                 variant="outline"
                 size="lg"
                 className="border-border bg-background/50 flex items-center gap-2 rounded-full backdrop-blur-sm"
               >
-                <Github className="h-4 w-4" />
-                Star on GitHub
+                <IconChalkboardTeacher className="h-4 w-4" />
+                Teacher Login
               </Button>
             </Link>
           </motion.div>
