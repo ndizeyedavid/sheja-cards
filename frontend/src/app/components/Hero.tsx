@@ -80,10 +80,7 @@ export default function Hero() {
               </Button>
             </Link>
 
-            <Link
-              href="https://github.com/ndizeyedavid/sheja-cards/"
-              target="_blank"
-            >
+            <Link href="teacher/auth/login" target="_blank">
               <Button
                 variant="outline"
                 size="lg"
