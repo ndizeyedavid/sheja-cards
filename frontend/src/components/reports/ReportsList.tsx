@@ -237,7 +237,7 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
         }}
         report={reportToPrint}
         schoolInfo={{
-          name: "SHEJA SCHOOL",
+          name: "SHEJA Cards",
           province: "KIGALI CITY",
           district: "KICUKIRO",
           poBox: "3806",
@@ -261,7 +261,7 @@ export default function ReportsList({ reports, isLoading }: ReportsListProps) {
           <div key={r.id} data-report-print-item>
             <ReportPrintTemplate
               report={r}
-              schoolName={"SHEJA SCHOOL"}
+              schoolName={"SHEJA Cards"}
               schoolInfo={{
                 district: "KICUKIRO",
                 poBox: "3806",
